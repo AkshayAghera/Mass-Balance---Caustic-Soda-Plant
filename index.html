@@ -49,19 +49,19 @@
 /* Mobile responsive */
 @media (max-width: 600px) {
   .logo-wrap img {
-    height: 48px;
+    height: 40px;
   }
 
   .title h1 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   .title p {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f9; padding: 20px; margin: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f9; padding: 8px; margin: 0; }
         
         /* Main Container setup */
         .calc-container { max-width: 1200px; margin: auto; padding-bottom: 50px; }
@@ -71,14 +71,14 @@
         /* Dashboard Grid Styling */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 10px; }
         .nav-card { 
-            background: white; padding: 25px; border-radius: 12px; 
+            background: white; padding: 16px; border-radius: 12px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; 
             transition: transform 0.2s, box-shadow 0.2s; border-top: 5px solid #ccc;
             display: flex; flex-direction: column; align-items: center; text-align: center;
         }
         .nav-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
         .nav-card h3 { margin: 10px 0 5px 0; color: #2c3e50; }
-        .nav-card p { font-size: 0.85rem; color: #7f8c8d; margin: 0; }
+        .nav-card p { font-size: 0.8rem; color: #7f8c8d; margin: 0; }
         
         /* Color coding */
         .card-main { border-color: #2ecc71; }
@@ -177,6 +177,15 @@
             .decl-calculation-block, .power-calculation-block, .refrig-calculation-block, .hcl-calculation-block {
                 grid-template-columns: 1fr;
             }
+.calc-container {
+  padding-bottom: 80px;
+}
+.wrap.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
         }
     </style>
 </head>
@@ -207,8 +216,8 @@
             <p>Voltage, K-Factor & Power Benchmarking</p>
         </div>
         <div class="nav-card card-hcl" onclick="showView('view-hcl')">
-            <h3 style="color:#c0392b">HCl Synthesis</h3>
-            <p>Furnace Balance & Mersen Optimizer</p>
+            <h3 style="color:#c0392b">HCl Furnance</h3>
+            <p>Furnace Balance & Optimization</p>
         </div>
         <div class="nav-card card-brine" onclick="showView('view-brine')">
             <h3 style="color:#e67e22">Primary Brine</h3>
