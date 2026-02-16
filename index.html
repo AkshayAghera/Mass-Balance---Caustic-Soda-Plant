@@ -49,18 +49,37 @@ padding-top: calc(12px + env(safe-area-inset-top));
   color: #5f6c7b;
 }
 
-/* Mobile responsive */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+
+  .wrap.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 10px;
+  }
+
+  .logo-wrap {
+    position: static;
+  }
+
   .logo-wrap img {
     height: 40px;
   }
 
+  .title {
+    position: static;
+    transform: none;
+    text-align: right;
+  }
+
   .title h1 {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin: 0;
   }
 
   .title p {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    margin: 2px 0 0;
   }
 }
 
