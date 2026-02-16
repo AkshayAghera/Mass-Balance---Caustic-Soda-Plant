@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover,maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <title>Chlor-Alkali Process Optimizer</title>
     <style>
-
-body {
-  padding-top: env(safe-area-inset-top);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
 /* ===== FIXED HORIZONTAL APP HEADER ===== */
 /* ===== PROFESSIONAL CENTERED HEADER ===== */
 .wrap.header {
-  display: flex;
-padding-top: calc(12px + env(safe-area-inset-top));
-  align-items: center;
-  justify-content: center;
   position: relative;
-  padding: 12px 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 10px 0;
 }
 
+/* Logo stays left */
 .logo-wrap {
-  position: absolute;
-  left: 10px;
+  flex-shrink: 0;
 }
 
 .logo-wrap img {
-  height: 48px;
+  height: 64px;
+  width: auto;
+  object-fit: contain;
 }
 
+/* Center the title block */
 .title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
-  padding: 0 70px; /* Prevent overlap with logo */
 }
 
 .title h1 {
@@ -49,35 +46,18 @@ padding-top: calc(12px + env(safe-area-inset-top));
   color: #5f6c7b;
 }
 
-@media (max-width: 768px) {
-
-  .wrap.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 10px;
-    margin-bottom: 12px;
-  }
-
+/* Mobile responsive */
+@media (max-width: 600px) {
   .logo-wrap img {
-    height: 36px;   /* smaller logo */
-  }
-
-  .title {
-    text-align: right;
-    line-height: 1.2;
+    height: 40px;
   }
 
   .title h1 {
-    font-size: 0.95rem;
-    margin: 0;
-    font-weight: 600;
+    font-size: 1.1rem;
   }
 
   .title p {
-    font-size: 0.65rem;
-    margin: 2px 0 0;
-    color: #6b7280;
+    font-size: 0.7rem;
   }
 }
 
