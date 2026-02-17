@@ -187,7 +187,6 @@
         }
     </style>
 </head>
-<body onload="initApp()"> <div class="calc-container">
 <div class="wrap header">
   <div class="logo-wrap" aria-hidden="true">
     <!-- ======= REPLACE THE IMAGE HERE =======
@@ -844,75 +843,109 @@ function initApp() {
     runRefrigCalc(); 
     calculateHclMersen(); // Init HCl calc
 }
-
-// --- HCL FURNACE CALCULATION LOGIC (New) ---
+/**
+ * HCL FURNACE CALCULATION - MERSEN UNIT
+ * Optimized for Nm3/hr Basis
+ */
 function calculateHclMersen() {
-    const mtpd = parseFloat(document.getElementById('in_mtpd').value) || 0;
-    const conc = (parseFloat(document.getElementById('in_conc').value) || 0) / 100;
-    const cl2_purity = (parseFloat(document.getElementById('in_cl2_pure').value) || 0) / 100;
-    const o2_in_cl2 = (parseFloat(document.getElementById('in_o2_cl2').value) || 0) / 100;
-    const f_csp = parseFloat(document.getElementById('flow_csp').value) || 0;
-    const f_scp = parseFloat(document.getElementById('flow_scp').value) || 0;
-    
-    const inerts_pct = 100 - (cl2_purity * 100) - (o2_in_cl2 * 100);
-    document.getElementById('cl2_inerts').innerText = inerts_pct.toFixed(2);
+    try {
+        // --- 1. GET USER INPUTS ---
+        const mtpd = parseFloat(document.getElementById('in_mtpd').value) || 0;
+        const conc = (parseFloat(document.getElementById('in_conc').value) || 0) / 100;
+        const cl2_purity = (parseFloat(document.getElementById('in_cl2_pure').value) || 0) / 100;
+        const o2_in_cl2 = (parseFloat(document.getElementById('in_o2_cl2').value) || 0) / 100;
+        const f_csp = parseFloat(document.getElementById('flow_csp').value) || 0;
+        const f_scp = parseFloat(document.getElementById('flow_scp').value) || 0;
+        
+        // --- 2. CONSTANTS & DENSITIES (kg/Nm3) ---
+        const rho_h2 = 0.0899;
+        const rho_cl2 = 3.17;
+        const rho_o2 = 1.429;
+        const rho_n2 = 1.251;
+        const mol_wt_hcl = 36.46;
+        const mol_wt_cl2 = 70.90;
+        const mol_wt_h2 = 2.016;
 
-    const rho_h2 = 0.0899, rho_cl2 = 3.17, rho_o2 = 1.429, rho_n2 = 1.251;
-    const target_hcl_kg_hr = (mtpd * 1000) / 24;
+        // --- 3. CHLORINE COMPOSITION ---
+        const inerts_pct = 100 - (cl2_purity * 100) - (o2_in_cl2 * 100);
+        document.getElementById('cl2_inerts').innerText = inerts_pct.toFixed(2);
 
-    const pure_cl2_req_kg = target_hcl_kg_hr * (71/73);
-    const cl2_nm3_hr = (pure_cl2_req_kg / rho_cl2) / cl2_purity;
-    const o2_mass_in_cl2 = (cl2_nm3_hr * o2_in_cl2 * rho_o2);
-    const inerts_mass_in_cl2 = (cl2_nm3_hr * (inerts_pct/100) * rho_n2);
-    const total_cl2_kg_hr = pure_cl2_req_kg + o2_mass_in_cl2 + inerts_mass_in_cl2;
+        // Weighted Density
+        const rho_cl2_mixture = (cl2_purity * rho_cl2) + (o2_in_cl2 * rho_o2) + ((inerts_pct / 100) * rho_n2);
 
-    const h2_hcl_theo_kg = target_hcl_kg_hr * (2/73); 
-    
-    const total_h2_nm3 = f_csp + f_scp;
-    if (total_h2_nm3 <= 0) {
-        resetHclOutputs();
-        return;
+        // --- 4. STOICHIOMETRY ---
+        const target_hcl_kg_hr = (mtpd * 1000) / 24;
+        const pure_cl2_req_kg = target_hcl_kg_hr * (mol_wt_cl2 / (2 * mol_wt_hcl));
+        const pure_h2_req_kg = target_hcl_kg_hr * (mol_wt_h2 / (2 * mol_wt_hcl));
+
+        // --- 5. CHLORINE FLOW ---
+        const total_cl2_kg_hr = pure_cl2_req_kg / cl2_purity;
+        const cl2_nm3_hr = total_cl2_kg_hr / rho_cl2_mixture;
+
+        // --- 6. HYDROGEN BLEND ---
+        const total_h2_nm3 = f_csp + f_scp;
+        
+        if (total_h2_nm3 <= 0 || cl2_nm3_hr <= 0) {
+            resetHclOutputs();
+            return;
+        }
+
+        const b_h2 = ((f_csp * 94.5) + (f_scp * 90.0)) / total_h2_nm3;
+        const b_o2 = ((f_csp * 0.1) + (f_scp * 2.0)) / total_h2_nm3;
+        const b_h2o = ((f_csp * 5.4) + (f_scp * 8.0)) / total_h2_nm3;
+
+        // --- 7. COMBUSTION ---
+        const o2_mass_in_cl2 = (cl2_nm3_hr * o2_in_cl2 * rho_o2);
+        const total_o2_mass_hr = o2_mass_in_cl2 + (total_h2_nm3 * (b_o2 / 100) * rho_o2);
+        const h2_for_o2_kg = total_o2_mass_hr * (mol_wt_h2 / 16); 
+
+        // --- 8. RATIOS ---
+        const actual_pure_h2_kg = total_h2_nm3 * (b_h2 / 100) * rho_h2;
+        const current_ratio = total_h2_nm3 / cl2_nm3_hr;
+        const net_excess = ((actual_pure_h2_kg - pure_h2_req_kg - h2_for_o2_kg) / pure_h2_req_kg) * 100;
+
+        // --- 9. WATER BALANCE ---
+        const total_acid_mass = target_hcl_kg_hr / (conc || 0.32);
+        const combustion_h2o = total_o2_mass_hr + h2_for_o2_kg;
+        const moisture_in_h2 = total_h2_nm3 * (b_h2o / 100) * 0.804;
+        const dm_water = (total_acid_mass - target_hcl_kg_hr - combustion_h2o - moisture_in_h2) / 1000;
+
+        // --- 10. RECOMMENDATION ---
+        const target_h2_mass = (pure_h2_req_kg * 1.05) + h2_for_o2_kg;
+        const target_h2_nm3_rec = (target_h2_mass / (b_h2 / 100)) / rho_h2;
+        const rec_ratio = target_h2_nm3_rec / cl2_nm3_hr;
+
+        // --- 11. UPDATE DISPLAY ---
+        document.getElementById('out_cl2_nm3').innerText = cl2_nm3_hr.toFixed(0);
+        document.getElementById('out_cl2_kg_total').innerText = total_cl2_kg_hr.toFixed(0);
+        document.getElementById('out_cl2_tpd').innerText = ((total_cl2_kg_hr * 24) / 1000).toFixed(1);
+        document.getElementById('out_h2_nm3').innerText = total_h2_nm3.toFixed(0);
+        document.getElementById('blend_h2_val').innerText = b_h2.toFixed(1) + "%";
+        document.getElementById('blend_o2_val').innerText = b_o2.toFixed(2) + "%";
+        document.getElementById('blend_h2o_val').innerText = b_h2o.toFixed(2) + "%";
+        document.getElementById('out_h2_kg').innerText = actual_pure_h2_kg.toFixed(1);
+        document.getElementById('out_current_ratio').innerText = current_ratio.toFixed(2);
+        document.getElementById('out_net_excess').innerText = net_excess.toFixed(2) + "%";
+        document.getElementById('rec_ratio_val').innerText = rec_ratio.toFixed(2);
+        document.getElementById('out_dm_m3').innerText = Math.max(0, dm_water).toFixed(2);
+
+    } catch (e) {
+        console.error("Calculation Error: ", e);
     }
-
-    const b_h2 = ((f_csp * 94.5) + (f_scp * 90.0)) / total_h2_nm3;
-    const b_o2 = ((f_csp * 0.1) + (f_scp * 2.0)) / total_h2_nm3;
-    const b_h2o = ((f_csp * 5.4) + (f_scp * 8.0)) / total_h2_nm3;
-
-    const total_o2_mass = o2_mass_in_cl2 + (total_h2_nm3 * (b_o2/100) * rho_o2);
-    const h2_o2_theo_kg = total_o2_mass * 0.125;
-
-    const actual_pure_h2_kg = total_h2_nm3 * (b_h2/100) * rho_h2;
-    const current_ratio = total_h2_nm3 / cl2_nm3_hr;
-    const net_excess = ((actual_pure_h2_kg - h2_hcl_theo_kg - h2_o2_theo_kg) / h2_hcl_theo_kg) * 100;
-
-    const total_acid_mass = target_hcl_kg_hr / conc;
-    const combustion_h2o = total_o2_mass + h2_o2_theo_kg;
-    const moisture_in_h2 = total_h2_nm3 * (b_h2o/100) * 0.804;
-    const dm_water = (total_acid_mass - target_hcl_kg_hr - combustion_h2o - moisture_in_h2) / 1000;
-
-    const target_h2_mass = (h2_hcl_theo_kg * 1.05) + h2_o2_theo_kg;
-    const target_h2_nm3 = (target_h2_mass / (b_h2/100)) / rho_h2;
-    const rec_ratio = target_h2_nm3 / cl2_nm3_hr;
-
-    document.getElementById('out_cl2_nm3').innerText = cl2_nm3_hr.toFixed(0);
-    document.getElementById('out_cl2_kg_total').innerText = total_cl2_kg_hr.toFixed(0);
-    document.getElementById('out_cl2_tpd').innerText = ((total_cl2_kg_hr * 24)/1000).toFixed(1);
-    document.getElementById('out_h2_nm3').innerText = total_h2_nm3.toFixed(0);
-    document.getElementById('out_h2_kg').innerText = actual_pure_h2_kg.toFixed(1);
-    document.getElementById('blend_h2_val').innerText = b_h2.toFixed(2) + "%";
-    document.getElementById('blend_o2_val').innerText = b_o2.toFixed(2) + "%";
-    document.getElementById('blend_h2o_val').innerText = b_h2o.toFixed(2) + "%";
-    document.getElementById('out_current_ratio').innerText = current_ratio.toFixed(2);
-    document.getElementById('out_net_excess').innerText = net_excess.toFixed(2) + "%";
-    document.getElementById('rec_ratio_val').innerText = rec_ratio.toFixed(2);
-    document.getElementById('out_dm_m3').innerText = Math.max(0, dm_water).toFixed(2);
 }
 
 function resetHclOutputs() {
-    const fields = ['out_cl2_nm3','out_cl2_kg_total','out_cl2_tpd','out_h2_nm3','out_h2_kg','blend_h2_val','blend_o2_val','blend_h2o_val','out_current_ratio','out_net_excess','rec_ratio_val','out_dm_m3'];
-    fields.forEach(f => document.getElementById(f).innerText = "-");
+    const fields = ['out_cl2_nm3','out_cl2_kg_total','out_cl2_tpd','out_h2_nm3','blend_h2_val',
+                   'blend_o2_val','blend_h2o_val','out_h2_kg','out_current_ratio',
+                   'out_net_excess','rec_ratio_val','out_dm_m3'];
+    fields.forEach(f => {
+        const el = document.getElementById(f);
+        if (el) el.innerText = "-";
+    });
 }
 
+// Run calculation once on load
+window.onload = calculateHclMersen;
 // --- NEW REFRIGERATION CALCULATION LOGIC (INTEGRATED) ---
 // Note: This logic is isolated from the main runBalance() to avoid conflicts.
 // It is triggered by its own inputs in the 'view-refrig' section.
