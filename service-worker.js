@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "mass-balance-cache-v1";
+const CACHE_NAME = "mass-balance-cache-v2";
 const urlsToCache = [
   "./",
   "./index.html",
