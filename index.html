@@ -351,7 +351,7 @@
                 <h3 style="color: #c0392b;">1. Chlorine Stream</h3>
                 <div class="res-item"><span class="res-label">Flow Rate (Nm³/hr):</span> <span class="res-val" id="out_cl2_nm3" style="color:#c0392b;">-</span></div>
                 <div class="res-item"><span class="res-label">Total Mass (kg/hr):</span> <span class="res-val" id="out_cl2_kg_total" style="color:#c0392b;">-</span></div>
-                <div class="res-item"><span class="res-label">Daily Load (TPD):</span> <span class="res-val highlight" id="out_cl2_tpd" style="color:#c0392b;">-</span></div>
+                <div class="res-item"><span class="res-label">Chlorine Consumed (TPD):</span> <span class="res-val" id="out_cl2_tpd" style="color:#c0392b;">-</span></div>
 
                 <h3 style="color: #c0392b; margin-top:20px;">2. Hydrogen Stream</h3>
                 <div class="res-item"><span class="res-label">Total Blend Flow (Nm³/hr):</span> <span class="res-val" id="out_h2_nm3" style="color:#c0392b;">-</span></div>
@@ -918,7 +918,7 @@ function calculateHclMersen() {
         // --- 11. UPDATE DISPLAY ---
         document.getElementById('out_cl2_nm3').innerText = cl2_nm3_hr.toFixed(0);
         document.getElementById('out_cl2_kg_total').innerText = total_cl2_kg_hr.toFixed(0);
-        document.getElementById('out_cl2_tpd').innerText = ((total_cl2_kg_hr * 24) / 1000).toFixed(1);
+        document.getElementById('out_cl2_tpd').innerText = ((pure_cl2_req_kg * 24) / 1000).toFixed(1);
         document.getElementById('out_h2_nm3').innerText = total_h2_nm3.toFixed(0);
         document.getElementById('blend_h2_val').innerText = b_h2.toFixed(1) + "%";
         document.getElementById('blend_o2_val').innerText = b_o2.toFixed(2) + "%";
@@ -946,6 +946,8 @@ function resetHclOutputs() {
 
 // Run calculation once on load
 window.onload = calculateHclMersen;
+
+
 // --- NEW REFRIGERATION CALCULATION LOGIC (INTEGRATED) ---
 // Note: This logic is isolated from the main runBalance() to avoid conflicts.
 // It is triggered by its own inputs in the 'view-refrig' section.
