@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>Chlor-Alkali Process Optimizer</title>
+    <style>
+/* ===== FIXED HORIZONTAL APP HEADER ===== */
+/* ===== PROFESSIONAL CENTERED HEADER ===== */
+.wrap.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 10px 0;
+}
+
+/* Logo stays left */
+.logo-wrap {
+  flex-shrink: 0;
+}
+
+.logo-wrap img {
+  height: 64px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Center the title block */
+.title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.title h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #1a3a5a;
+}
+
+.title p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #5f6c7b;
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .logo-wrap img {
+    height: 40px;
+  }
+
+  .title h1 {
+    font-size: 1.1rem;
+  }
+
+  .title p {
+    font-size: 0.7rem;
+  }
+}
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f9; padding: 8px; margin: 0; }
+        
+        /* Main Container setup */
+        .calc-container { max-width: 1200px; margin: auto; padding-bottom: 50px; }
+        
+       
+
+        /* Dashboard Grid Styling */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 10px; }
+        .nav-card { 
+            background: white; padding: 16px; border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s; border-top: 5px solid #ccc;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .nav-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .nav-card h3 { margin: 10px 0 5px 0; color: #2c3e50; }
+        .nav-card p { font-size: 0.8rem; color: #7f8c8d; margin: 0; }
+        
+        /* Color coding */
+        .card-main { border-color: #2ecc71; }
+        .card-power { border-color: #8e44ad; }
+        .card-brine { border-color: #e67e22; }
+        .card-cdu { border-color: #4f46e5; }
+        .card-dechlor { border-color: #10b981; }
+        .card-acid { border-color: #d63384; }
+        .card-steam { border-color: #e67e22; }
+        .card-hypo { border-color: #f1c40f; }
+        .card-mgmt { border-color: #3498db; }
+        .card-refrig { border-color: #2980b9; }
+        .card-hcl { border-color: #c0392b; } /* NEW HCL CARD COLOR */
+
+        /* View Containers */
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Back Button */
+        .back-btn { 
+            background-color: #ecf0f1; color: #2c3e50; border: none; 
+            padding: 10px 20px; border-radius: 6px; font-weight: 600; 
+            cursor: pointer; margin-bottom: 20px; display: inline-flex; align-items: center;
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background-color: #bdc3c7; }
+
+        /* Layout Grids */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .input-section { padding: 20px; border-radius: 8px; border: 1px solid #2ecc71; background-color: #f2fdf6; } 
+        .output-section { padding: 20px; border-radius: 8px; border: 1px solid #2ecc71; background-color: white; border-left: 6px solid #2ecc71; }
+        
+        /* Specific Blocks Styling */
+        .steam-calculation-block, .acid-calculation-block, .cdu-calculation-block, .decl-calculation-block, 
+        .mgmt-section, .power-calculation-block, .refrig-calculation-block, .hcl-calculation-block {
+            background-color: white; padding: 25px; border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 0;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+        }
+
+        /* Specific borders */
+        .steam-calculation-block { border-top: 5px solid #e67e22; background-color: #fff9f2; }
+        .acid-calculation-block { border-top: 5px solid #d63384; background-color: #fff0f5; }
+        .cdu-calculation-block { border-top: 5px solid #4f46e5; background-color: #eef2ff; }
+        .decl-calculation-block { border-top: 5px solid #10b981; background-color: #f0fdf4; }
+        .power-calculation-block { border-top: 5px solid #8e44ad; background-color: #fbf6ff; }
+        .mgmt-section { border-top: 5px solid #3498db; background-color: #f0f7ff; display: block; }
+        .refrig-calculation-block { border-top: 5px solid #2980b9; background-color: #f4faff; }
+        .hcl-calculation-block { border-top: 5px solid #c0392b; background-color: #fff5f5; } /* NEW HCL STYLE */
+
+        /* Inputs and Outputs inside blocks */
+        .steam-inputs, .acid-inputs, .cdu-inputs, .decl-inputs, .power-inputs, .refrig-inputs, .hcl-inputs { padding: 10px; }
+        .steam-outputs, .acid-outputs, .cdu-outputs, .decl-outputs, .power-outputs, .refrig-outputs, .hcl-outputs { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* Border left colors for outputs */
+        .steam-outputs { border-left: 5px solid #e67e22; }
+        .acid-outputs { border-left: 5px solid #d63384; }
+        .cdu-outputs { border-left: 5px solid #4f46e5; }
+        .decl-outputs { border-left: 5px solid #10b981; }
+        .power-outputs { border-left: 5px solid #8e44ad; }
+        .refrig-outputs { border-left: 5px solid #2980b9; }
+        .hcl-outputs { border-left: 5px solid #c0392b; } /* NEW HCL OUTPUT STYLE */
+
+        /* Standard Elements */
+        label { display: block; margin-top: 15px; font-weight: 600; color: #34495e; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccd6dd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; transition: border 0.3s; }
+        input:focus { border-color: #3498db; outline: none; }
+        
+        .res-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #eee; }
+        .res-item:last-child { border-bottom: none; }
+        .res-label { font-weight: 500; color: #57606f; }
+        .res-value { font-weight: 700; color: #2ecc71; } 
+        
+        .unit { font-size: 0.75rem; color: #a4b0be; margin-left: 5px; font-weight: normal; }
+        h3 { margin-top: 0; margin-bottom: 20px; color: #1a3a5a; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; }
+
+        /* Utilities */
+        .breakdown { margin-bottom: 15px; }
+        .head { font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+        
+        /* Helpers from Snippet */
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .res-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e0e0e0; }
+        .res-val { font-weight: 700; color: #1a3a5a; }
+        .highlight { color: #e67e22; font-size: 1.1rem; }
+        .block-header { font-weight: bold; color: #2c3e50; margin-bottom: 12px; font-size: 1.05rem; display: flex; align-items: center; }
+        .res-box { margin-bottom: 25px; }
+        .comp-box { background: #f1f3f4; padding: 10px; border-radius: 4px; border: 1px dashed #90a4ae; margin-top: 5px; font-size: 0.85em; color: #546e7a; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .grid, .steam-calculation-block, .acid-calculation-block, .cdu-calculation-block, 
+            .decl-calculation-block, .power-calculation-block, .refrig-calculation-block, .hcl-calculation-block {
+                grid-template-columns: 1fr;
+            }
+.calc-container {
+  padding-bottom: 80px;
+}
+.wrap.header {
+  position: static;
+}
+
+        }
+    </style>
+</head>
+<div class="wrap header">
+  <div class="logo-wrap" aria-hidden="true">
+    <!-- ======= REPLACE THE IMAGE HERE =======
+         Replace the PASTE_BASE64_HERE token below with your PNG base64 string.
+         Example final src value:
+         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA..."
+    -->
+    <img id="uiLogo" src="data:image/png;base64,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" alt="GACL logo" style="height:72px;object-fit:contain;" onerror="this.style.display='none'" />
+  </div>
+
+  <div class="title">
+    <h1>Mass Balance (CSP)</h1>
+    <p>Prepared by <strong>Akshay Aghera</strong></p>
+  </div>
+</div>
+
+    <div id="dashboard-menu" class="dashboard-grid">
+        <div class="nav-card card-main" onclick="showView('view-main')">
+            <h3 style="color:#2ecc71">General Balance</h3>
+            <p>Process Inputs, TPD Load, & Liquid Flows</p>
+        </div>
+        <div class="nav-card card-power" onclick="showView('view-power')">
+            <h3 style="color:#8e44ad">Electrolyzer Performance</h3>
+            <p>Voltage, K-Factor & Power Benchmarking</p>
+        </div>
+        <div class="nav-card card-hcl" onclick="showView('view-hcl')">
+            <h3 style="color:#c0392b">HCl Furnance</h3>
+            <p>Furnace Balance & Optimization</p>
+        </div>
+        <div class="nav-card card-brine" onclick="showView('view-brine')">
+            <h3 style="color:#e67e22">Primary Brine</h3>
+            <p>Soda Ash & NaoH Consumption</p>
+        </div>
+        <div class="nav-card card-cdu" onclick="showView('view-cdu')">
+            <h3 style="color:#4f46e5">CDU</h3>
+            <p>Chlorate Destruction & HCl Usage</p>
+        </div>
+        <div class="nav-card card-dechlor" onclick="showView('view-dechlor')">
+            <h3 style="color:#10b981">Anolyte Section</h3>
+            <p>SBS and NaOH Dosing </p>
+        </div>
+        <div class="nav-card card-acid" onclick="showView('view-acid')">
+            <h3 style="color:#d63384">Sulfuric Acid</h3>
+            <p>Chlorine Drying & Acid Consumption</p>
+        </div>
+        <div class="nav-card card-steam" onclick="showView('view-steam')">
+            <h3 style="color:#e67e22">Steam Balance</h3>
+            <p>Evaporation, Heating & Condensate</p>
+        </div>
+        <div class="nav-card card-refrig" onclick="showView('view-refrig')">
+            <h3 style="color:#2980b9">Refrigeration</h3>
+            <p>Chlorine Liquefier & Economizer</p>
+        </div>
+        <div class="nav-card card-hypo" onclick="showView('view-hypo')">
+            <h3 style="color:#f1c40f">Hypo Production</h3>
+            <p>Batch Calculations & Ratios</p>
+        </div>
+        <div class="nav-card card-mgmt" onclick="showView('view-mgmt')">
+            <h3 style="color:#3498db">Water Management</h3>
+            <p>Recovery Streams & Plant Balance</p>
+        </div>
+    </div>
+
+    <div id="view-main" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="grid">
+            <div class="input-section">
+                <h3 style="color: #2ecc71;">Process Inputs</h3>
+                <label>Load (TPD 100% NaOH)</label>
+                <input type="number" id="tpd" value="950" oninput="runBalance()">
+                <label>Brine Inlet / Outlet (g/L)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="gin" value="310" oninput="runBalance()">
+                    <input type="number" id="gout" value="220" oninput="runBalance()">
+                </div>
+                <label>Caustic Feed (Cin) / Product (Cout) %</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="cin" value="29.24" oninput="runBalance()">
+                    <input type="number" id="cout" value="31.78" oninput="runBalance()">
+                </div>
+                <label>Operating Temp (°C)</label>
+                <input type="number" id="temp" value="89" oninput="runBalance()">
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><label>Cl₂ Gas Press (mmWC)</label><input type="number" id="pcl2" value="1500" oninput="runBalance()"></div>
+                    <div style="flex:1;"><label>H₂ Gas Press (mmWC)</label><input type="number" id="ph2" value="1700" oninput="runBalance()"></div>
+                </div>
+                <label>Water Transport (mol H2O/mol Na+)</label>
+                <input type="number" id="wt" value="3.7" step="0.01" oninput="runBalance()">
+                <label>Final Evaporator Conc (%)</label>
+                <input type="number" id="target_conc" value="49" oninput="runBalance()">
+                <label>Moisture in Salt (%)</label>
+                <input type="number" id="salt_moist_pct" value="4" oninput="runBalance()">
+            </div>
+
+            <div class="output-section">
+                <h3 style="color: #2ecc71;">Liquid Flows</h3>
+                <div class="res-item"><span class="res-label">Brine Feed Flow:</span> <div><span class="res-value" id="r_brineIn">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Anolyte (Spent Brine) Flow:</span> <div><span class="res-value" id="r_anolyte">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">DM Water (Caustic Dilution):</span> <div><span class="res-value" id="r_dmCau">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">DM Water Loss Brine Side:</span> <div><span class="res-value" id="r_dmBrine">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Evaporator Condensate:</span> <div><span class="res-value" id="r_evap">0</span><span class="unit">m³/hr</span></div></div>
+                
+                <h3 style="color: #2ecc71; margin-top:20px;">Gas Flow Rates & Moisture</h3>
+                <div class="res-item"><span class="res-label">Chlorine Flow:</span> <div><span class="res-value" id="r_cl2_flow">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item">
+                    <span class="res-label">Moisture in Cl₂:</span> 
+                    <div>
+                        <span class="res-value" id="r_vapCl2">0</span> <span class="unit">kg/hr</span> 
+                        <span style="color:#a4b0be; font-weight:normal;">||</span> 
+                        <span class="res-value" id="r_moist_cl2_pct">0</span><span class="unit">wt%</span>
+                    </div>
+                </div>
+                <div class="res-item"><span class="res-label">Hydrogen Flow:</span> <div><span class="res-value" id="r_h2_flow">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item">
+                    <span class="res-label">Moisture in H₂:</span> 
+                    <div>
+                        <span class="res-value" id="r_vapH2">0</span> <span class="unit">kg/hr</span> 
+                        <span style="color:#a4b0be; font-weight:normal;">||</span> 
+                        <span class="res-value" id="r_moist_h2_pct">0</span><span class="unit">wt%</span>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2ecc71; margin-top:20px;">Internal Balance</h3>
+                <div class="res-item"><span class="res-label">Water from Membrane:</span> <div><span class="res-value" id="r_wtr">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Reaction Water Used:</span> <div><span class="res-value" id="r_wrx">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Salt Consumption:</span> <div><span class="res-value" id="r_salt">0</span><span class="unit">kg/hr</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-hcl" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="hcl-calculation-block">
+            <div class="hcl-inputs">
+                <h3 style="color: #c0392b;">HCl Plant Inputs</h3>
+                
+                <label>HCl Plant Load (MTPD 100%)</label>
+                <input type="number" id="in_mtpd" value="45" oninput="calculateHclMersen()">
+                
+                <label>Target Acid Concentration (%)</label>
+                <input type="number" id="in_conc" value="32" oninput="calculateHclMersen()">
+                
+                <label>Cl2 Purity (%) / O2 in Cl2 (%)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="in_cl2_pure" value="93" oninput="calculateHclMersen()">
+                    <input type="number" id="in_o2_cl2" value="6" oninput="calculateHclMersen()">
+                </div>
+                <div class="comp-box">Cl2 Inerts (100 - Cl2 - O2): <span id="cl2_inerts" style="font-weight:bold;">1.00</span>%</div>
+                
+                <hr>
+                
+                <label>CSP Hydrogen Flow (Nm³/hr)</label>
+                <input type="number" id="flow_csp" value="400" oninput="calculateHclMersen()">
+                <div class="comp-box"><strong>CSP Spec:</strong> H₂ 94.5% | O₂ 0.1% | H₂O 5.4%</div>
+                
+                <label>SCP Hydrogen Flow (Nm³/hr)</label>
+                <input type="number" id="flow_scp" value="400" oninput="calculateHclMersen()">
+                <div class="comp-box"><strong>SCP Spec:</strong> H₂ 90.0% | O₂ 2.0% | H₂O 8.0%</div>
+            </div>
+
+            <div class="hcl-outputs">
+                <h3 style="color: #c0392b;">1. Chlorine Stream</h3>
+                <div class="res-item"><span class="res-label">Flow Rate (Nm³/hr):</span> <span class="res-val" id="out_cl2_nm3" style="color:#c0392b;">-</span></div>
+                <div class="res-item"><span class="res-label">Total Mass (kg/hr):</span> <span class="res-val" id="out_cl2_kg_total" style="color:#c0392b;">-</span></div>
+                <div class="res-item"><span class="res-label">Chlorine Consumed (TPD):</span> <span class="res-val" id="out_cl2_tpd" style="color:#c0392b;">-</span></div>
+
+                <h3 style="color: #c0392b; margin-top:20px;">2. Hydrogen Stream</h3>
+                <div class="res-item"><span class="res-label">Total Blend Flow (Nm³/hr):</span> <span class="res-val" id="out_h2_nm3" style="color:#c0392b;">-</span></div>
+                <div class="res-item"><span class="res-label">Blended H₂ Purity:</span> <span class="res-val" id="blend_h2_val" style="color:#c0392b;">-</span></div>
+                <div class="res-item"><span class="res-label">Blended O₂ / H₂O:</span> <span class="res-val" style="color:#c0392b;"><span id="blend_o2_val">-</span> / <span id="blend_h2o_val">-</span></span></div>
+                <div class="res-item"><span class="res-label">Actual Pure H₂ Fed (kg/hr):</span> <span class="res-val" id="out_h2_kg" style="color:#c0392b;">-</span></div>
+
+                <h3 style="color: #c0392b; margin-top:20px;">3. Furnace Performance</h3>
+                <div class="res-item"><span class="res-label">Current DCS Ratio (H2/Cl2):</span> <span class="res-val" id="out_current_ratio" style="color:#c0392b;">-</span></div>
+                <div class="res-item"><span class="res-label">Net Excess H₂ (Wt %):</span> <span class="res-val" style="color:#c0392b;" id="out_net_excess">-</span></div>
+                <div class="res-item">
+                    <span class="res-label"; font-weight:bold;">Recommended Ratio (5% Excess):</span> 
+                    <span class="res-val" style="color: #c0392b;" id="rec_ratio_val">-</span>
+                </div>
+
+                <h3 style="color: #c0392b; margin-top:20px;">4. Absorption Section</h3>
+                <div class="res-item"; padding: 10px;">
+                    <span class="res-label">DM Water Required (m³/hr)</span> 
+                    <span class="res-val" style="color:#c0392b;" id="out_dm_m3">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-refrig" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="refrig-calculation-block">
+            <div class="refrig-inputs">
+                <h3 style="color: #2980b9;">Chlorine Liquefier</h3>
+                <div class="block">
+                    <div class="block-header">1. Liquefier Data</div>
+                    <div class="input-row">
+                        <div><label>Chlorine Flow (kg/hr)</label><input type="number" id="cl2_m" value="25648" oninput="runRefrigCalc()"></div>
+                        <div><label>Cl2 Pressure (barA)</label><input type="number" id="cl2_p" value="4" step="0.01" oninput="runRefrigCalc()"></div>
+                    </div>
+                    <div class="input-row">
+                        <div><label>Inlet Gas Temp (°C)</label><input type="number" id="cl2_tin" value="45" oninput="runRefrigCalc()"></div>
+                        <div><label>Target Outlet Temp (°C)</label><input type="number" id="cl2_tout_user" value="-5" oninput="runRefrigCalc()"></div>
+                    </div>
+                    <div class="input-row">
+                        <div><label>R-134A Evap. Temp (°C)</label><input type="number" id="f_t_evap" value="-12" oninput="runRefrigCalc()"></div>
+                        <div><label>R-134A Evap. Pressure (barA)</label><input type="number" id="f_p_liq" readonly></div>
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top:20px;">
+                    <div class="block-header">2. Compressor & Condenser</div>
+                    <div class="input-row">
+                        <div><label>Discharge Temp (°C)</label><input type="number" id="f_t_dis" value="63" oninput="runRefrigCalc()"></div>
+                        <div><label>Discharge Pressure (barA)</label><input type="number" id="f_p_dis" readonly></div>
+                    </div>
+                    <div class="input-row">
+                        <div><label>Condensing Temp (°C)</label><input type="number" id="f_t_cond" value="42" oninput="runRefrigCalc()"></div>
+                        <div><label>CW Inlet/Outlet ΔT</label><div style="display:flex; gap:5px;"><input type="number" id="cw_tin" value="32" oninput="runRefrigCalc()"><input type="number" id="cw_tout" value="36" oninput="runRefrigCalc()"></div></div>
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top:20px;">
+                    <div class="block-header">3. Economizer Logic</div>
+                    <div class="input-row">
+                        <div><label>Split Fraction (0 - 0.5)</label><input type="number" id="f_x_eco" value="0.3" step="0.01" oninput="runRefrigCalc()"></div>
+                        <div><label>Economizer Pressure (barA)</label><input type="number" id="f_p_eco" value="4" step="0.01" oninput="runRefrigCalc()"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="refrig-outputs">
+                <h3 style="color: #2980b9;">Refrigeration Results</h3>
+                <div class="res-box">
+                    <div class="block-header">Chlorine Output</div>
+                    <div class="res-line"><span>Cl2 Boiling Point:</span> <div><span class="res-val" id="r_cl2_tsat" style="color: #2980b9;">0</span><span class="unit">°C</span></div></div>
+                    <div class="res-line"><span>Total Cooling Load:</span> <div><span class="res-val highlight" id="r_cl2_q" style="color: #2980b9;">0</span><span class="unit">kW</span></div></div>
+                </div>
+
+                <div class="res-box">
+                    <div class="block-header", style="color: #2980b9;">Stream Flows & Pressures</div>
+                    <hr>
+                    <div style="font-size: 1rem; font-weight: bold; margin-bottom: 5px;">Economizer</div>
+                    <div class="res-line",><span>Flow to Economizer:</span> <div><span class="res-val" id="r_m_eco" style="color: #2980b9;">0</span><span class="unit">kg/hr</span></div></div>
+                    <div class="res-line"><span>Pressure:</span> <div><span class="res-val" id="r_p_eco_out" style="color: #2980b9;">0</span><span class="unit">barA</span></div></div>
+                    <div class="res-line"><span>Saturation Temp:</span> <div><span class="res-val" id="r_t_eco" style="color: #2980b9;">0</span><span class="unit">°C</span></div></div>
+                    <div class="res-line"><span>Vapor Fraction (x):</span> <div><span class="res-val" id="r_x_eco" style="color: #2980b9;">0</span></div></div>
+                    
+                    <hr>
+                    <div style="font-size: 1rem; font-weight: bold; margin-bottom: 5px;">Subcooled Branch (Pre-Throttle)</div>
+                    <div class="res-line"><span>Flow to Evaporator:</span> <div><span class="res-val" id="r_m_sub" style="color: #2980b9;">0</span><span class="unit">kg/hr</span></div></div>
+                    <div class="res-line"><span>Pressure:</span> <div><span class="res-val" id="r_p_sub" style="color: #2980b9;">0</span><span class="unit">barA</span></div></div>
+                    <div class="res-line"><span>Temperature:</span> <div><span class="res-val" id="r_t_sub" style="color: #2980b9;">0</span><span class="unit">°C</span></div></div>
+                </div>
+
+                <div class="res-box">
+                    <div class="block-header", style="color: #2980b9;">System Performance</div>
+                    <div class="res-line"><span>Refrigeration Capacity:</span> <div><span class="res-val highlight" id="r_tr" style="color: #2980b9;">0</span><span class="unit">TR</span></div></div>
+                    <div class="res-line"><span>Compressor Power:</span> <div><span class="res-val highlight" style="color: #2980b9;" id="r_power">0</span><span class="unit">kW</span></div></div>
+                    <div class="res-line"><span>Efficiency (Lower is Better):</span> <div><span class="res-val" id="r_eff" style="color: #2980b9;">0</span><span class="unit">kW/TR</span></div></div>
+                    <div class="res-line"><span>Total Freon Flow:</span> <div><span class="res-val highlight" id="r_f_total" style="color: #2980b9;">0</span><span class="unit">kg/hr</span></div></div>
+                    <div class="res-line"><span>Required CW Flow:</span> <div><span class="res-val highlight" id="r_cw_flow" style="color: #2980b9;">0</span><span class="unit">m³/hr</span></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="view-power" class="view-section">
+    <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+    <div class="power-calculation-block">
+        <div class="power-inputs">
+            <h3 style="color: #8e44ad;">Electrolyzer Data</h3>
+            <label>Membrane Generation</label>
+            <select id="p_gen" onchange="runPowerCalc()">
+                <option value="6thB+">6thB+ (Area 2.85)</option>
+                <option value="4th">4/5/5thB+ (Area 2.72)</option>
+            </select>
+            
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label>Elements</label><input type="number" id="p_elements" value="144" oninput="runPowerCalc()"></div>
+                <div style="flex:1;"><label>Current (kA)</label><input type="number" id="p_ka" value="11" oninput="runPowerCalc()"></div>
+            </div>
+            
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label>Total Voltage (V)</label><input type="number" id="p_totalV" value="440" oninput="runPowerCalc()"></div>
+                <div style="flex:1;"><label>Efficiency (%)</label><input type="number" id="p_eff" value="95" oninput="runPowerCalc()"></div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label>Catholyte Conc (%)</label><input type="number" id="p_conc" value="31.8" step="0.1" oninput="runPowerCalc()"></div>
+                <div style="flex:1;"><label>Catholyte Temp (°C)</label><input type="number" id="p_temp" value="88" oninput="runPowerCalc()"></div>
+            </div>
+        </div>
+
+        <div class="power-outputs">
+    <h3 style="color: #8e44ad;">Performance</h3>
+    <div class="res-item"><span class="res-label">Current Density:</span> <div><span class="res-value" id="p_cd" style="color:#8e44ad;">0</span><span class="unit">kA/m²</span></div></div>
+    <div class="res-item"><span class="res-label">Avg Cell Voltage:</span> <div><span class="res-value" id="p_avgv" style="color:#8e44ad;">0</span><span class="unit">V</span></div></div>
+    <div class="res-item"><span class="res-label">K-Factor:</span> <div><span class="res-value" id="p_k" style="color:#8e44ad;">0</span></div></div>
+    <div class="res-item"><span class="res-label">Daily Production:</span> <div><span class="res-value" id="p_prod" style="color:#8e44ad;">0</span><span class="unit">MT/Day</span></div></div>
+    
+    <hr>
+    <div class="head" style="color: #8e44ad;">Standardized Voltages</div>
+    <div class="res-item"><span class="res-label">StdV @ 3.0 CD:</span> <div><span class="res-value" id="p_stdv3" style="color:#8e44ad;">0</span><span class="unit">V</span></div></div>
+    <div class="res-item"><span class="res-label">StdV @ 4.0 CD:</span> <div><span class="res-value" id="p_stdv4" style="color:#8e44ad;">0</span><span class="unit">V</span></div></div>
+    <div class="res-item"><span class="res-label">StdV @ 5.0 CD:</span> <div><span class="res-value" id="p_stdv5" style="color:#8e44ad;">0</span><span class="unit">V</span></div></div>
+    
+    <div class="head" style="color: #8e44ad; margin-top:15px;">Power Consumption</div>
+    <div class="res-item"><span class="res-label">DC Power (Average):</span> <div><span class="res-value" id="p_dc_avg" style="color:#8e44ad;">0</span><span class="unit">kWh/MT</span></div></div>
+    <div class="res-item"><span class="res-label">DC Power @ 3 CD:</span> <div><span class="res-value" id="p_dc3" style="color:#8e44ad;">0</span><span class="unit">kWh/MT</span></div></div>
+    <div class="res-item"><span class="res-label">DC Power @ 4 CD:</span> <div><span class="res-value" id="p_dc4" style="color:#8e44ad;">0</span><span class="unit">kWh/MT</span></div></div>
+    <div class="res-item"><span class="res-label">DC Power @ 5 CD:</span> <div><span class="res-value" id="p_dc5" style="color:#8e44ad;">0</span><span class="unit">kWh/MT</span></div></div>
+</div>
+        </div>
+    </div>
+</div>
+
+    <div id="view-brine" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="decl-calculation-block" style="background-color: #fffaf0; border-color: #f39c12; border-top-color: #f39c12;">
+            <div class="decl-inputs">
+                <h3 style="color: #e67e22;">Primary Brine Treatment</h3>
+                
+                <label>Salt Consumption (100% Basis) (kg/hr)</label>
+                <input type="number" id="f_salt_dry">
+                
+                <label>Moisture in Salt (%)</label>
+                <input type="number" id="c_moist" value="4" oninput="syncMoisture('c_moist')">
+                
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label>Ca in Salt (%)</label>
+                        <input type="number" id="c_ca" value="0.08" step="0.001" oninput="runBalance()">
+                    </div>
+                    <div style="flex:1;">
+                        <label>Mg in Salt (%)</label>
+                        <input type="number" id="c_mg" value="0.04" step="0.001" oninput="runBalance()">
+                    </div>
+                </div>
+                <label>Other Impurities / Insolubles (%)</label>
+                <input type="number" id="c_other" value="1.0" step="0.1" oninput="runBalance()">
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label>Excess Soda (g/L)</label>
+                        <input type="number" id="ex_soda" value="0.4" step="0.1" oninput="runBalance()">
+                    </div>
+                    <div style="flex:1;">
+                        <label>Excess NaOH (g/L)</label>
+                        <input type="number" id="ex_naoh" value="0.2" step="0.1" oninput="runBalance()">
+                    </div>
+                </div>
+
+                <label>Dosing NaOH Strength (%)</label>
+                <input type="number" id="c_naoh_strength" value="32" oninput="runBalance()">
+            </div>
+
+            <div class="decl-outputs" style="border-left: 6px solid #f39c12;">
+                <h3 style="color: #e67e22;">Purification Results</h3>
+                <div class="res-item">
+                    <span class="res-label">Total Wet Salt Feed:</span> 
+                    <div><span class="res-value" id="r_salt_wet" style="color:#e67e22;">0</span><span class="unit">kg/hr</span></div>
+                </div>
+                
+                <div class="res-item">
+                    <span class="res-label">10% Na2CO3 Flow:</span> 
+                    <div>
+                        <span class="res-value" id="r_soda_flow" style="color:#e67e22;">0</span><span class="unit">kg/hr</span> | 
+                        <span class="res-value" id="r_soda_vol" style="color:#e67e22; font-weight:bold;">0.00</span><span class="unit">m³/hr</span>
+                    </div>
+                </div>
+                
+                <div class="res-item">
+                    <span class="res-label">NaOH Dosing Flow:</span> 
+                    <div>
+                        <span class="res-value" id="r_purif_naoh_flow" style="color:#e67e22;">0</span><span class="unit">kg/hr</span> | 
+                        <span class="res-value" id="r_purif_naoh_vol" style="color:#e67e22; font-weight:bold;">0.00</span><span class="unit">m³/hr</span>
+                    </div>
+                </div>
+                
+                <hr>
+                <div class="head" style="color: #e67e22;">Specific Consumption (Per Ton NaOH)</div>
+                <div class="res-item">
+                    <span class="res-label">Na2CO3 (100%):</span> 
+                    <div><span class="res-value" id="r_soda_ratio" style="color:#e67e22;">0</span><span class="unit">kg/MT</span></div>
+                </div>
+                <div class="res-item">
+                    <span class="res-label">NaOH (100%):</span> 
+                    <div><span class="res-value" id="r_naoh_pur_ratio" style="color:#e67e22;">0</span><span class="unit">kg/MT</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-cdu" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="cdu-calculation-block">
+            <div class="cdu-inputs">
+                <h3 style="color: #4f46e5;">Chlorate Destruction Unit</h3>
+                <label>Brine Flow to CDU (m³/hr)</label>
+                <input type="number" id="cdu_brine_q" value="25" oninput="runBalance()">
+                <label>Inlet Chlorate (g/L)</label>
+                <input type="number" id="clo3_in" value="8" oninput="runBalance()">
+                <label>Target Outlet Chlorate (g/L)</label>
+                <input type="number" id="clo3_out" value="5" oninput="runBalance()">
+                <label>HCl Strength (%)</label>
+                <input type="number" id="hcl_strength" value="32" oninput="runBalance()">
+                <label>Residual Acidity (g/L HCl)</label>
+                <input type="number" id="target_acidity" value="18" oninput="runBalance()">
+            </div>
+            <div class="cdu-outputs">
+                <h3 style="color: #4f46e5;">CDU Results</h3>
+                <div class="res-item"><span class="res-label">Chlorate Destroyed:</span> <div><span class="res-value" id="r_clo3_dest" style="color:#4f46e5;">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">HCl Flow Rate (Mass):</span> <div><span class="res-value" id="r_hcl_kg_hr" style="color:#4f46e5;">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">HCl Flow Rate (Vol):</span> <div><span class="res-value" id="r_hcl_flow_m3" style="color:#4f46e5;">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Cl₂ Gas Generated:</span> <div><span class="res-value" id="r_cdu_cl2_gen" style="color:#4f46e5;">0</span><span class="unit">kg/hr</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-dechlor" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="decl-calculation-block">
+            <div class="decl-inputs">
+                <h3 style="color: #10b981;">Anolyte Section</h3>
+                <label>Anolyte Free Chlorine (Inlet PPM)</label>
+                <input type="number" id="inlet_cl2_ppm" value="2500" oninput="runBalance()">
+                <label>Target Outlet Cl₂ (ppm) [After Vacuum]</label>
+                <input type="number" id="target_ppm" value="20" oninput="runBalance()">
+                <label>Dechlorination Vacuum (mmHg Abs)</label>
+                <input type="number" id="decl_vac" value="450" oninput="runBalance()">
+                
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><label>NaOH Sol. %</label><input type="number" id="pol_naoh_pct" value="32" oninput="runBalance()"></div>
+                    <div style="flex:1;"><label>SBS Excess PPM</label><input type="number" id="sbs_excess" value="3" oninput="runBalance()"></div>
+                </div>
+                <label>NaOH Excess (mg/L)</label>
+                <input type="number" id="naoh_excess_mg" value="350" oninput="runBalance()">
+                
+                <label>Anolyte pH (From Cells)</label>
+                <input type="number" id="anolyte_ph" value="4.5" step="0.1" oninput="runBalance()">
+                <label>Total HCl to Dechlorination (AUTO) (kg/hr)</label>
+                <input type="number" id="manual_hcl" value="0" oninput="runBalance()">
+            </div>
+
+            <div class="decl-outputs">
+                <h3 style="color: #10b981;">Recovery & Chemical Demand</h3>
+                <div class="res-item"><span class="res-label">Calculated Final pH:</span> <div><span class="res-value" id="r_post_ph" style="color:#10b981;">0</span></div></div>
+                <div class="res-item"><span class="res-label">Brine Boiling Point:</span> <div><span class="res-value" id="r_brine_bp" style="color:#10b981;">0</span><span class="unit">°C</span></div></div>
+                <div class="res-item"><span class="res-label">Bubble Cl₂:</span> <div><span class="res-value" id="r_bubble_cl2" style="color:#10b981;">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Stripped Cl₂:</span> <div><span class="res-value" id="r_stripped_cl2" style="color:#10b981;">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Total Chlorine Recovered:</span> <div><span class="res-value" id="r_total_cl2_rec" style="color:#10b981; font-size: 1.1rem;">0</span><span class="unit">kg/hr</span></div></div>
+                
+                <hr>
+                <div class="head" style="color: #10b981;">SBS 10% Solution Flow</div>
+                <div class="res-item"><span class="res-label">Flow Rate (Mass):</span> <div><span class="res-value" id="r_sbs_kg">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Flow Rate (Vol):</span> <div><span class="res-value" id="r_sbs_m3">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Spec. Cons (100%):</span> <div><span class="res-value" id="r_sbs_mt">0</span><span class="unit">kg/MT NaOH</span></div></div>
+                
+                <div class="head" style="color: #10b981; margin-top:15px;">NaOH Flow</div>
+                <div class="res-item"><span class="res-label">Flow Rate (Mass):</span> <div><span class="res-value" id="r_naoh_pol_kg">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Flow Rate (Vol):</span> <div><span class="res-value" id="r_naoh_pol_m3">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Spec. Cons (100%):</span> <div><span class="res-value" id="r_naoh_pol_mt">0</span><span class="unit">kg/MT NaOH</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-acid" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="acid-calculation-block">
+            <div class="acid-inputs">
+                <h3 style="color: #d63384;">Sulfuric Acid Consumption</h3>
+                <label>Inlet Concentration (%)</label>
+                <input type="number" id="acid_in_conc" value="98" oninput="runBalance()">
+                <label>Outlet Concentration (%)</label>
+                <input type="number" id="acid_out_conc" value="78" oninput="runBalance()">
+                <label>Chlorine Gas Pressure (mmWCg)</label>
+                <input type="number" id="acid_p_cl2" value="900" oninput="runBalance()">
+                <label>Chlorine Gas Temperature (°C)</label>
+                <input type="number" id="acid_t_cl2" value="18" oninput="runBalance()">
+                <label>H2SO4 Cost (Rs/kg)</label>
+                <input type="number" id="acid_cost_kg" value="12" oninput="runBalance()">
+            </div>
+            <div class="acid-outputs">
+                <h3 style="color: #d63384;">Acid Results</h3>
+                <div class="res-item"><span class="res-label">Moisture in Cl₂:</span> <div><span class="res-value" id="r_acid_moist" style="color:#d63384;">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Acid Consumption:</span> <div><span class="res-value" id="r_acid_cons" style="color:#d63384;">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Ratio / Ton Cl₂:</span> <div><span class="res-value" id="r_ratio_cl2" style="color:#d63384;">0</span><span class="unit">kg/MT</span></div></div>
+                <div class="res-item"><span class="res-label">Ratio / Ton NaOH:</span> <div><span class="res-value" id="r_ratio_naoh" style="color:#d63384;">0</span><span class="unit">kg/MT</span></div></div>
+                <div class="res-item"><span class="res-label">Drying Cost / Ton NaOH:</span> <div><span class="res-value" id="r_acid_cost_ton" style="color:#d63384;">0</span><span class="unit">Rs./Ton</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-steam" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="steam-calculation-block">
+            <div class="steam-inputs">
+                <h3 style="color: #e67e22;">Steam Block Inputs</h3>
+                <label>LP Steam Setpoint (kg/cm²g)</label>
+                <input type="number" id="lp_p_set" value="2.0" step="0.1" oninput="runBalance()">
+                <label>Desuperheater Temp (°C)</label>
+                <input type="number" id="ds_t_set" value="145" oninput="runBalance()">
+                <label>Brine In / Out Temp(°C)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="b_tin" value="71" oninput="runBalance()">
+                    <input type="number" id="b_tout" value="80" oninput="runBalance()">
+                </div>
+                <label>Caustic Flow(m³/hr)</label>
+                <input type="number" id="c_flow_steam" value="200" oninput="runBalance()">
+                <label>Caustic In / Out Temp(°C)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="c_tin" value="80" oninput="runBalance()">
+                    <input type="number" id="c_tout" value="90" oninput="runBalance()">
+                </div>
+                
+                <label>Brine Flow to CDU (m³/hr)</label>
+                <input type="number" id="cdu_flow" value="25" oninput="runBalance()">
+                <label>CDU In / Out Temp(°C)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="cdu_tin" value="85" oninput="runBalance()">
+                    <input type="number" id="cdu_tout" value="95" oninput="runBalance()">
+                </div>
+                <label>Steam Cost (per Ton)</label>
+                <input type="number" id="s_cost" value="3200" oninput="runBalance()">
+            </div>
+            <div class="steam-outputs">
+                <h3 style="color: #e67e22;">Steam Consumption Breakdown</h3>
+                <div class="breakdown">
+                    <div class="res-item"><span class="res-label">Brine Heating:</span> <div><span class="res-value" id="r_steam_brine" style="color:#e67e22;">0</span><span class="unit">kg/hr</span></div></div>
+                    <div class="res-item"><span class="res-label">Caustic Heating:</span> <div><span class="res-value" id="r_steam_caustic" style="color:#e67e22;">0</span><span class="unit">kg/hr</span></div></div>
+                    <div class="res-item"><span class="res-label">CDU Heating:</span> <div><span class="res-value" id="r_steam_cdu" style="color:#e67e22;">0</span><span class="unit">kg/hr</span></div></div>
+                </div>
+                <h3 style="color: #e67e22;">Total Steam Results</h3>
+                <div class="res-item"><span class="res-label">Total Steam Consumption:</span> <div><span class="res-value" id="r_steam_kg" style="color:#e67e22;">0</span><span class="unit">kg/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Daily Steam Consumption:</span> <div><span class="res-value" id="r_steam_day" style="color:#e67e22;">0</span><span class="unit">MT/day</span></div></div>
+                <div class="res-item"><span class="res-label">DM Water (Desuperheater):</span> <div><span class="res-value" id="r_dm_ds_m3" style="color:#e67e22;">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Condensate Generated:</span> <div><span class="res-value" id="r_condensate_m3" style="color:#e67e22;">0</span><span class="unit">m³/hr</span></div></div>
+                <div class="res-item"><span class="res-label">Steam Ratio / Ton NaOH :</span> <div><span class="res-value" id="r_ratio" style="color:#e67e22;">0</span><span class="unit">MT/MT NaOH</span></div></div>
+                <div class="res-item" ><span class="res-label">Steam Cost / Ton NaOH:</span> <div><span class="res-value" id="r_cost_ton" style="color:#e67e22;">0</span><span class="unit">Rs./Ton</span></div></div>
+                <div class="res-item"><span class="res-label">Steam Saturation Temp:</span> <div><span class="res-value" id="r_tsat" style="color:#e67e22;">0</span><span class="unit">°C</span></div></div>
+                <div class="res-item"><span class="res-label">Steam Latent Heat:</span> <div><span class="res-value" id="r_hfg" style="color:#e67e22;">0</span><span class="unit">kJ/kg</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-hypo" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="cdu-calculation-block" style="background-color: #fffdec; border-color: #f1c40f; border-top-color: #f1c40f;">
+            <div class="cdu-inputs">
+                <h3 style="color: #d4ac0d;">Sodium Hypochlorite Production</h3>
+                <label>Total Production (MT)</label>
+                <input type="number" id="hypo_batch_size" value="10" oninput="runBalance()">
+                <label>Available Chlorine (g/L)</label>
+                <input type="number" id="hypo_av_cl2" value="140" oninput="runBalance()">
+                <label>Excess Caustic (g/L NaOH)</label>
+                <input type="number" id="hypo_ex_naoh" value="30" oninput="runBalance()">
+                <label>Feed Caustic Strength (%)</label>
+                <input type="number" id="hypo_feed_naoh_pct" value="18" oninput="runBalance()">
+            </div>
+            <div class="cdu-outputs" style="border-left-color: #f1c40f;">
+                <h3 style="color: #d4ac0d;">Hypo Results</h3>
+                <div class="res-item"><span class="res-label">Calculated Density:</span> <div><span class="res-value" id="r_hypo_rho" style="color:#d4ac0d;">0</span><span class="unit">kg/m³</span></div></div>
+                <div class="res-item"><span class="res-label">Hypo Strength (Active):</span> <div><span class="res-value" id="r_hypo_wt_pct" style="color:#d4ac0d;">0</span><span class="unit">% wt/wt</span></div></div>
+                
+                <div class="head" style="color: #d4ac0d; margin-top:15px;">Total Consumption (for <span id="r_batch_disp">0</span> MT)</div>
+                <div class="res-item"><span class="res-label">Chlorine Required:</span> <div><span class="res-value" id="r_hypo_cl2_total" style="color:#d4ac0d; font-size: 1.1rem;">0</span><span class="unit">kg</span></div></div>
+                <div class="res-item"><span class="res-label">NaOH (100%) Required:</span> <div><span class="res-value" id="r_hypo_naoh100_total" style="color:#d4ac0d; font-size: 1.1rem;">0</span><span class="unit">kg</span></div></div>
+                <div class="res-item"><span class="res-label">Feed Caustic (18%) Required:</span> <div><span class="res-value" id="r_hypo_feed_total" style="color:#d4ac0d;">0</span><span class="unit">kg</span></div></div>
+                
+                <hr>
+                <div class="res-item"><span class="res-label">Cl₂ : Hypo Ratio:</span> <div><span class="res-value" id="r_hypo_cl2_ratio" style="color:#d4ac0d;">0</span><span class="unit">MT/MT</span></div></div>
+                <div class="res-item"><span class="res-label">NaOH : Hypo Ratio:</span> <div><span class="res-value" id="r_hypo_naoh_ratio" style="color:#d4ac0d;">0</span><span class="unit">MT/MT</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-mgmt" class="view-section">
+        <button class="back-btn" onclick="showDashboard()">← Back to Menu</button>
+        <div class="mgmt-section">
+            <h3 style="color: #2980b9;">Brine Water Management (Recovery Streams)</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+                <div>
+                    <label>1. WCF 1,2,3</label><input type="number" id="s1" value="1.2" oninput="runBalance()">
+                    <label>2. Safety Vessel</label><input type="number" id="s2" value="1.5" oninput="runBalance()">
+                    <label>3. H2 Filters</label><input type="number" id="s3" value="1.5" oninput="runBalance()">
+                    <label>4. Vacuum Pumps</label><input type="number" id="s4" value="5.0" oninput="runBalance()">
+                    <label>5. SBS in Brine</label><input type="number" id="s5" value="4.0" oninput="runBalance()">
+                    <label>16. CEU Condensate (AUTO)</label><input type="number" id="s16" value="0.0" oninput="runBalance()">
+                </div>
+                <div>
+                    <label>6. HCL in CDU</label><input type="number" id="s6" value="2.5" oninput="runBalance()">
+                    <label>7. NaOH in Brine</label><input type="number" id="s7" value="1.5" oninput="runBalance()">
+                    <label>8. IE Regeneration</label><input type="number" id="s8" value="7.0" oninput="runBalance()">
+                    <label>9. Cl2 Condensate (AUTO)</label><input type="number" id="s9" value="0.0" oninput="runBalance()">
+                    <label>10. H2 Condensate (AUTO)</label><input type="number" id="s10" value="0.0" oninput="runBalance()">
+                </div>
+                <div>
+                    <label>11. Steam Condensate (AUTO)</label><input type="number" id="s11" value="0.0">
+                    <label>12. Flocal</label><input type="number" id="s12" value="2.0" oninput="runBalance()">
+                    <label>13. Steam to CDU</label><input type="number" id="s13" value="2.0" oninput="runBalance()">
+                    <label>14. SCP to Anolyte</label><input type="number" id="s14" value="0.5" oninput="runBalance()">
+                    <label>15. Anss to Sat.</label><input type="number" id="s15" value="1.5" oninput="runBalance()">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-top:20px; border-top: 2px solid #3498db; padding-top:15px;">
+                <div style="background:white; padding:10px; border-radius:5px; text-align:center; border:1px solid #bdc3c7;">
+                    <span style="font-size:0.8rem; font-weight:bold;">TOTAL RECOVERY IN BRINE SYSTEM</span><br>
+                    <span id="r_rec_total" style="font-size:1.3rem; font-weight:bold; color:#2980b9;">0.00</span>
+                </div>
+                <div style="background:white; padding:10px; border-radius:5px; text-align:center; border:1px solid #bdc3c7;">
+                    <span style="font-size:0.8rem; font-weight:bold;">MEMBRANE TRANSPORT LOSS</span><br>
+                    <span id="r_mem_loss" style="font-size:1.3rem; font-weight:bold; color:#e67e22;">0.00</span>
+                </div>
+                <div id="acc_box" style="background:#f2fdf6; padding:10px; border-radius:5px; text-align:center; border:2px solid #2ecc71;">
+                    <span style="font-size:0.8rem; font-weight:bold; color:#27ae60;">ACCOMMODATE IN BRINE</span><br>
+                    <span id="r_accommodate" style="font-size:1.3rem; font-weight:bold; color:#27ae60;">0.00</span>
+                </div>
+                <div id="status_box" style="background:#fff5f5; padding:10px; border-radius:5px; text-align:center; border:2px solid #e74c3c;">
+                    <span style="font-size:0.8rem; font-weight:bold; color:#c0392b;">SENT TO POWERPLANT OR DRAIN</span><br>
+                    <span id="r_divert" style="font-size:1.3rem; font-weight:bold; color:#e74c3c;">0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// --- NAVIGATION LOGIC ---
+function showDashboard() {
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.getElementById('dashboard-menu').style.display = 'grid';
+}
+
+function showView(viewId) {
+    document.getElementById('dashboard-menu').style.display = 'none';
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    
+    // Trigger relevant calculations based on the view
+    if(viewId === 'view-refrig') {
+        runRefrigCalc();
+    } else if(viewId === 'view-hcl') {
+        calculateHclMersen();
+    } else {
+        runBalance();
+        runPowerCalc(); 
+    }
+}
+
+function initApp() {
+    runBalance();
+    runPowerCalc();
+    runRefrigCalc(); 
+    calculateHclMersen(); // Init HCl calc
+}
+/**
+ * HCL FURNACE CALCULATION - MERSEN UNIT
+ * Optimized for Nm3/hr Basis
+ */
+function calculateHclMersen() {
+    try {
+        // --- 1. GET USER INPUTS ---
+        const mtpd = parseFloat(document.getElementById('in_mtpd').value) || 0;
+        const conc = (parseFloat(document.getElementById('in_conc').value) || 0) / 100;
+        const cl2_purity = (parseFloat(document.getElementById('in_cl2_pure').value) || 0) / 100;
+        const o2_in_cl2 = (parseFloat(document.getElementById('in_o2_cl2').value) || 0) / 100;
+        const f_csp = parseFloat(document.getElementById('flow_csp').value) || 0;
+        const f_scp = parseFloat(document.getElementById('flow_scp').value) || 0;
+        
+        // --- 2. CONSTANTS & DENSITIES (kg/Nm3) ---
+        const rho_h2 = 0.0899;
+        const rho_cl2 = 3.17;
+        const rho_o2 = 1.429;
+        const rho_n2 = 1.251;
+        const mol_wt_hcl = 36.46;
+        const mol_wt_cl2 = 70.90;
+        const mol_wt_h2 = 2.016;
+
+        // --- 3. CHLORINE COMPOSITION ---
+        const inerts_pct = 100 - (cl2_purity * 100) - (o2_in_cl2 * 100);
+        document.getElementById('cl2_inerts').innerText = inerts_pct.toFixed(2);
+
+        // Weighted Density
+        const rho_cl2_mixture = (cl2_purity * rho_cl2) + (o2_in_cl2 * rho_o2) + ((inerts_pct / 100) * rho_n2);
+
+        // --- 4. STOICHIOMETRY ---
+        const target_hcl_kg_hr = (mtpd * 1000) / 24;
+        const pure_cl2_req_kg = target_hcl_kg_hr * (mol_wt_cl2 / (2 * mol_wt_hcl));
+        const pure_h2_req_kg = target_hcl_kg_hr * (mol_wt_h2 / (2 * mol_wt_hcl));
+
+        // --- 5. CHLORINE FLOW ---
+        const total_cl2_kg_hr = pure_cl2_req_kg / cl2_purity;
+        const cl2_nm3_hr = total_cl2_kg_hr / rho_cl2_mixture;
+
+        // --- 6. HYDROGEN BLEND ---
+        const total_h2_nm3 = f_csp + f_scp;
+        
+        if (total_h2_nm3 <= 0 || cl2_nm3_hr <= 0) {
+            resetHclOutputs();
+            return;
+        }
+
+        const b_h2 = ((f_csp * 94.5) + (f_scp * 90.0)) / total_h2_nm3;
+        const b_o2 = ((f_csp * 0.1) + (f_scp * 2.0)) / total_h2_nm3;
+        const b_h2o = ((f_csp * 5.4) + (f_scp * 8.0)) / total_h2_nm3;
+
+        // --- 7. COMBUSTION ---
+        const o2_mass_in_cl2 = (cl2_nm3_hr * o2_in_cl2 * rho_o2);
+        const total_o2_mass_hr = o2_mass_in_cl2 + (total_h2_nm3 * (b_o2 / 100) * rho_o2);
+        const h2_for_o2_kg = total_o2_mass_hr * (mol_wt_h2 / 16); 
+
+        // --- 8. RATIOS ---
+        const actual_pure_h2_kg = total_h2_nm3 * (b_h2 / 100) * rho_h2;
+        const current_ratio = total_h2_nm3 / cl2_nm3_hr;
+        const net_excess = ((actual_pure_h2_kg - pure_h2_req_kg - h2_for_o2_kg) / pure_h2_req_kg) * 100;
+
+        // --- 9. WATER BALANCE ---
+        const total_acid_mass = target_hcl_kg_hr / (conc || 0.32);
+        const combustion_h2o = total_o2_mass_hr + h2_for_o2_kg;
+        const moisture_in_h2 = total_h2_nm3 * (b_h2o / 100) * 0.804;
+        const dm_water = (total_acid_mass - target_hcl_kg_hr - combustion_h2o - moisture_in_h2) / 1000;
+
+        // --- 10. RECOMMENDATION ---
+        const target_h2_mass = (pure_h2_req_kg * 1.05) + h2_for_o2_kg;
+        const target_h2_nm3_rec = (target_h2_mass / (b_h2 / 100)) / rho_h2;
+        const rec_ratio = target_h2_nm3_rec / cl2_nm3_hr;
+
+        // --- 11. UPDATE DISPLAY ---
+        document.getElementById('out_cl2_nm3').innerText = cl2_nm3_hr.toFixed(0);
+        document.getElementById('out_cl2_kg_total').innerText = total_cl2_kg_hr.toFixed(0);
+        document.getElementById('out_cl2_tpd').innerText = ((pure_cl2_req_kg * 24) / 1000).toFixed(1);
+        document.getElementById('out_h2_nm3').innerText = total_h2_nm3.toFixed(0);
+        document.getElementById('blend_h2_val').innerText = b_h2.toFixed(1) + "%";
+        document.getElementById('blend_o2_val').innerText = b_o2.toFixed(2) + "%";
+        document.getElementById('blend_h2o_val').innerText = b_h2o.toFixed(2) + "%";
+        document.getElementById('out_h2_kg').innerText = actual_pure_h2_kg.toFixed(1);
+        document.getElementById('out_current_ratio').innerText = current_ratio.toFixed(2);
+        document.getElementById('out_net_excess').innerText = net_excess.toFixed(2) + "%";
+        document.getElementById('rec_ratio_val').innerText = rec_ratio.toFixed(2);
+        document.getElementById('out_dm_m3').innerText = Math.max(0, dm_water).toFixed(2);
+
+    } catch (e) {
+        console.error("Calculation Error: ", e);
+    }
+}
+
+function resetHclOutputs() {
+    const fields = ['out_cl2_nm3','out_cl2_kg_total','out_cl2_tpd','out_h2_nm3','blend_h2_val',
+                   'blend_o2_val','blend_h2o_val','out_h2_kg','out_current_ratio',
+                   'out_net_excess','rec_ratio_val','out_dm_m3'];
+    fields.forEach(f => {
+        const el = document.getElementById(f);
+        if (el) el.innerText = "-";
+    });
+}
+
+// Run calculation once on load
+window.onload = calculateHclMersen;
+
+
+// --- NEW REFRIGERATION CALCULATION LOGIC (INTEGRATED) ---
+// Note: This logic is isolated from the main runBalance() to avoid conflicts.
+// It is triggered by its own inputs in the 'view-refrig' section.
+
+const cl2_table = [[-17, 2], [-11, 2.5], [-5, 3], [-4, 3.15], [-3, 3.35], [-2, 3.48], [-1, 3.6], [0, 3.664], [1, 3.8], [2, 3.9], [3, 4], [4, 4.2], [5, 4.3], [6, 4.5], [7, 4.6], [8, 4.75], [9, 4.9], [10, 5.01], [11, 5.1], [12, 5.2], [13, 5.4], [14, 5.6], [15, 5.8], [16, 5.9], [17, 6.15], [18, 6.3], [19, 6.4], [20, 6.7], [30, 8.8], [40, 11.27]];
+const r134a_table = [[-70, 0.08], [-68, 0.09], [-66, 0.11], [-64, 0.12], [-62, 0.14], [-60, 0.16], [-58, 0.18], [-56, 0.21], [-54, 0.23], [-52, 0.26], [-50, 0.29], [-48, 0.33], [-46, 0.37], [-44, 0.41], [-42, 0.46], [-40, 0.51], [-38, 0.57], [-36, 0.63], [-34, 0.70], [-32, 0.77], [-30, 0.84], [-28, 0.93], [-26, 1.02], [-24, 1.11], [-22, 1.22], [-20, 1.33], [-18, 1.45], [-16, 1.57], [-14, 1.71], [-12, 1.85], [-10, 2.01], [-8, 2.17], [-6, 2.34], [-4, 2.53], [-2, 2.72], [0, 2.93], [2, 3.15], [4, 3.38], [6, 3.62], [8, 3.88], [10, 4.15], [12, 4.43], [14, 4.73], [16, 5.04], [18, 5.37], [20, 5.72], [22, 6.08], [24, 6.46], [26, 6.85], [28, 7.27], [30, 7.70], [32, 8.15], [34, 8.63], [36, 9.12], [38, 9.63], [40, 10.17], [42, 10.72], [44, 11.30], [46, 11.90], [48, 12.53], [50, 13.18], [52, 13.85], [54, 14.56], [56, 15.28], [58, 16.04], [60, 16.82], [62, 17.63], [64, 18.47], [66, 19.34], [68, 20.24], [70, 21.17]];
+
+function interpolate(pressure, table) {
+    if (pressure <= table[0][1]) return table[0][0];
+    if (pressure >= table[table.length - 1][1]) return table[table.length - 1][0];
+    for (let i = 0; i < table.length - 1; i++) {
+        let p1 = table[i][1], p2 = table[i+1][1];
+        if (pressure >= p1 && pressure <= p2) {
+            let t1 = table[i][0], t2 = table[i+1][0];
+            return t1 + (t2 - t1) * (pressure - p1) / (p2 - p1);
+        }
+    }
+}
+
+function interpolateP(temp, table) {
+    if (temp <= table[0][0]) return table[0][1];
+    if (temp >= table[table.length - 1][0]) return table[table.length - 1][1];
+    for (let i = 0; i < table.length - 1; i++) {
+        let t1 = table[i][0], t2 = table[i+1][0];
+        if (temp >= t1 && temp <= t2) {
+            let p1 = table[i][1], p2 = table[i+1][1];
+            return p1 + (p2 - p1) * (temp - t1) / (t2 - t1);
+        }
+    }
+}
+function runRefrigCalc() {
+    try {
+        // 1. Input Retrieval
+        const cl2_m = parseFloat(document.getElementById('cl2_m').value) || 0; // Total Feed
+        const cl2_p = parseFloat(document.getElementById('cl2_p').value) || 3;
+        const cl2_tin = parseFloat(document.getElementById('cl2_tin').value) || 0;
+        const cl2_tout_user = parseFloat(document.getElementById('cl2_tout_user').value) || 0;
+        
+        const t_evap_target = parseFloat(document.getElementById('f_t_evap').value) || -12;
+        const t_dis = parseFloat(document.getElementById('f_t_dis').value) || 68;
+        const t_cond = parseFloat(document.getElementById('f_t_cond').value) || 42;
+        const cw_tin = parseFloat(document.getElementById('cw_tin').value) || 32;
+        const cw_tout = parseFloat(document.getElementById('cw_tout').value) || 36;
+        
+        const x_input = document.getElementById('f_x_eco').value;
+        const x_eco = (x_input === "" || isNaN(x_input)) ? 0.22 : parseFloat(x_input);
+        const p_eco = parseFloat(document.getElementById('f_p_eco').value) || 4.15;
+
+        // --- LIQUEFACTION EFFICIENCY & MASS LOGIC ---
+        const liq_eff = 0.92; // Fixed at 92% per your requirement
+        const m_liq = cl2_m * liq_eff; // Actual liquid produced
+
+        // --- SUPERHEAT LOGIC ---
+        const superheat = 3; 
+        const t_suct_actual = t_evap_target + superheat; 
+
+        // 2. Pressure and Temperature Interpolation
+        const p_liq = interpolateP(t_evap_target, r134a_table); 
+        const p_dis = interpolateP(t_cond, r134a_table);  
+        
+        if(document.getElementById('f_p_liq')) document.getElementById('f_p_liq').value = p_liq.toFixed(2);
+        if(document.getElementById('f_p_dis')) document.getElementById('f_p_dis').value = p_dis.toFixed(2);
+
+        const cl2_tsat = interpolate(cl2_p, cl2_table); // Will be 3.0 at 4 bar
+        const t_eco = interpolate(p_eco, r134a_table);  
+
+        // 3. Enthalpy Constants
+        const h_l_cond = 200 + (1.38 * t_cond);
+        const h_v_eco = 398 + (0.61 * t_eco);
+        const h_l_eco = 200 + (1.38 * t_eco);
+        const h_v_suct = 398 + (0.61 * t_suct_actual); 
+        
+        const x_throttled = (h_l_cond - h_l_eco) / (h_v_eco - h_l_eco);
+
+        // --- UPDATED CHLORINE HEAT LOAD CALCULATION (Split-Mass) ---
+        // 1. Sensible cooling of ALL feed gas to Saturation (3°C)
+        const q_sensible_gas = (cl2_m / 3600) * 0.49 * (cl2_tin - cl2_tsat);
+        // 2. Latent heat of ONLY the liquefied portion
+        const q_latent = (m_liq / 3600) * 255; 
+        // 3. Sub-cooling of ONLY the liquid portion (Corrected Cp to 0.96)
+        const q_sensible_liq = (m_liq / 3600) * 0.96 * (cl2_tsat - cl2_tout_user);
+
+        // 4. Sum Theoretical and apply alignment factor (1.088) to match KPCL 608 TR
+        const q_theoretical = q_sensible_gas + q_latent + q_sensible_liq;
+        const q_cl2_kw = q_theoretical * 1.088; 
+        
+        // Sub-cooling logic (Freon side)
+        let t_sub = t_cond;
+        if (x_eco > 0) {
+            const q_eco_absorbed = x_eco * (h_v_eco - h_l_cond);
+            let t_sub_calc = t_cond - (q_eco_absorbed / ((1 - x_eco) * 1.42));
+            t_sub = Math.max(t_sub_calc, t_eco + 1); 
+        }
+
+        const h_l_sub_final = 200 + (1.38 * t_sub);
+        
+        // Refrigeration Effect and Mass Flow
+        const ref_effect = (h_v_suct - h_l_sub_final); 
+        const m_total = (q_cl2_kw / (ref_effect * (1 - x_eco))) * 3600;
+        const m_eco = m_total * x_eco;
+        const m_evap = m_total * (1 - x_eco);
+
+        // 4. POWER LOGIC
+        const n = 0.23;              
+        const C = 0.215;             
+        const efficiency = 0.505;    
+
+        const power_stage1 = (m_evap / 3600) * C * (t_suct_actual + 273.15) * (Math.pow(p_eco / p_liq, n) - 1) / efficiency;
+        const power_stage2 = (m_total / 3600) * C * (t_eco + 273.15) * (Math.pow(p_dis / p_eco, n) - 1) / efficiency;
+        const power_kw = power_stage1 + power_stage2;
+
+        // 5. Utility Calculations
+        const tr_capacity = q_cl2_kw / 3.517;
+        const q_cond = (m_total / 3600) * ((400 + 1.15 * t_dis) - h_l_cond);
+        const cw_flow = (cw_tout - cw_tin > 0) ? (q_cond / (4.186 * (cw_tout - cw_tin))) * 3.6 : 0;
+
+        // 6. UI Updates
+        const updateText = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val;
+        };
+
+        updateText('r_cl2_tsat', cl2_tsat.toFixed(1));
+        updateText('r_cl2_q', q_cl2_kw.toFixed(1));
+        updateText('r_f_total', Math.round(m_total).toLocaleString());
+        updateText('r_m_eco', Math.round(m_eco).toLocaleString());
+        updateText('r_p_eco_out', p_eco.toFixed(2));
+        updateText('r_m_sub', Math.round(m_evap).toLocaleString());
+        updateText('r_p_sub', p_dis.toFixed(2));
+        updateText('r_t_sub', t_sub.toFixed(1));
+        updateText('r_cw_flow', cw_flow.toFixed(1));
+        updateText('r_t_eco', t_eco.toFixed(1));
+        updateText('r_x_eco', x_throttled.toFixed(2));
+        updateText('r_power', power_kw.toFixed(1));
+        updateText('r_tr', tr_capacity.toFixed(1));
+        
+        if (tr_capacity > 0) {
+            updateText('r_eff', (power_kw / tr_capacity).toFixed(3));
+        }
+
+    } catch (err) {
+        console.error("Calculation Error:", err);
+    }
+}
+// --- ELECTROLYZER PERFORMANCE CALCULATION ---
+function runPowerCalc() {
+    // 1. INPUTS
+    const gen = document.getElementById('p_gen').value;
+    const elements = parseFloat(document.getElementById('p_elements').value) || 0;
+    const KA = parseFloat(document.getElementById('p_ka').value) || 0;
+    const totV = parseFloat(document.getElementById('p_totalV').value) || 0;
+    const eff = (parseFloat(document.getElementById('p_eff').value) || 0) / 100;
+    const conc = parseFloat(document.getElementById('p_conc').value) || 32;
+    const temp = parseFloat(document.getElementById('p_temp').value) || 90;
+
+    // 2. CONSTANTS & BASE CALCS
+    const divisor = gen === '6thB+' ? 2.85 : 2.72;
+    const CD = divisor > 0 ? KA / divisor : 0;
+    const avgV = elements > 0 ? totV / elements : 0;
+    const K = CD > 0 ? (avgV - 2.4) / CD : 0;
+
+    // 3. STANDARDIZED VOLTAGE LOGIC (3, 4, 5 CD)
+    let StdV3 = 0, StdV4 = 0, StdV5 = 0;
+    
+    if (CD > 0) {
+        // Logic for 3 CD: Coefficients 0.01 (Temp) / 0.02 (Conc)
+        StdV3 = 2.4 + ((avgV - 2.4) / CD) * 3 - 0.01 * (90 - temp) + 0.02 * (32 - conc);
+        
+        // Logic for 4 CD: Coefficients 0.013 (Temp) / 0.026 (Conc)
+        StdV4 = 2.4 + ((avgV - 2.4) / CD) * 4 - 0.013 * (90 - temp) + 0.026 * (32 - conc);
+        
+        // Logic for 5 CD: Conditional based on Generation
+        if (gen === '6thB+') {
+            StdV5 = 2.4 + ((avgV - 2.4) / CD) * 5 - 0.02 * (90 - temp) + 0.04 * (32 - conc);
+        } else {
+            StdV5 = 2.4 + ((avgV - 2.4) / CD) * 5 - 0.016 * (90 - temp) + 0.033 * (32 - conc);
+        }
+    }
+
+    // 4. POWER CONSUMPTION (kWh/MT)
+    // Formula: (Voltage * 1000) / (1.49235 * Efficiency)
+    const DC3 = (eff > 0) ? (StdV3 * 1000) / (1.49235 * eff) : 0;
+    const DC4 = (eff > 0) ? (StdV4 * 1000) / (1.49235 * eff) : 0;
+    const DC5 = (eff > 0) ? (StdV5 * 1000) / (1.49235 * eff) : 0;
+    const DCAvg = (eff > 0 && avgV > 0) ? (avgV * 1000) / (1.49235 * eff) : 0;
+
+    // Production calculation (MT/day)
+    const production = (1.49235 * elements * KA * 24 * eff) / 1000;
+
+    // 5. MAPPING TO UI
+    document.getElementById('p_cd').innerText = CD.toFixed(2);
+    document.getElementById('p_avgv').innerText = avgV.toFixed(2);
+    document.getElementById('p_k').innerText = K.toFixed(3);
+    document.getElementById('p_prod').innerText = production.toFixed(1);
+    
+    document.getElementById('p_stdv3').innerText = StdV3.toFixed(2);
+    document.getElementById('p_stdv4').innerText = StdV4.toFixed(2);
+    document.getElementById('p_stdv5').innerText = StdV5.toFixed(2);
+    
+    document.getElementById('p_dc_avg').innerText = Math.round(DCAvg);
+    document.getElementById('p_dc3').innerText = Math.round(DC3);
+    document.getElementById('p_dc4').innerText = Math.round(DC4);
+    document.getElementById('p_dc5').innerText = Math.round(DC5);
+}
+// --- ORIGINAL CALCULATION LOGIC PRESERVED BELOW ---
+function syncMoisture(sourceId) {
+    const val = document.getElementById(sourceId).value;
+    if (sourceId === 'salt_moist_pct') {
+        document.getElementById('c_moist').value = val;
+    } else {
+        document.getElementById('salt_moist_pct').value = val;
+    }
+    runBalance();
+}
+
+function runBalance() {
+    const tpd = parseFloat(document.getElementById('tpd').value) || 0;
+    const gin = parseFloat(document.getElementById('gin').value) || 0;
+    const gout = parseFloat(document.getElementById('gout').value) || 0;
+    const cin = (parseFloat(document.getElementById('cin').value) || 0) / 100;
+    const cout = (parseFloat(document.getElementById('cout').value) || 0) / 100;
+    const target = (parseFloat(document.getElementById('target_conc').value) || 49) / 100;
+    const temp = parseFloat(document.getElementById('temp').value) || 0;
+    const pcl2 = parseFloat(document.getElementById('pcl2').value) || 0;
+    const ph2 = parseFloat(document.getElementById('ph2').value) || 0;
+    const wt = parseFloat(document.getElementById('wt').value) || 0;
+    const salt_moist_pct = parseFloat(document.getElementById('salt_moist_pct').value) || 0;
+
+    if (tpd <= 0 || cin >= cout) return;
+
+    const rho_in = 1185;
+    const rho_out = 1125;
+    const m_naoh = (tpd * 1000) / 24; 
+    const m_salt = m_naoh * (58.44 / 40);
+    const m_na = m_naoh * (22.99 / 40);
+    const m_h2 = m_naoh * (1.008 / 40);
+    const m_cl2 = m_naoh * (35.45 / 40);
+    const m_wtr_mem = (m_naoh / 40) * wt * 18.015;
+    const m_wrx = (m_naoh / 40) * 18.015;
+
+    const p_sat_pure_now = Math.pow(10, 8.07131 - (1730.63 / (temp + 233.426)));
+    let p_v_h2_mmhg = (temp >= 70) ? (31.66 * 7.50062) * (p_sat_pure_now / Math.pow(10, 8.07131 - (1730.63 / (temp + 233.426)))) : p_sat_pure_now;
+    
+    const v_cl2 = (m_cl2 / 70.9) * (p_sat_pure_now / (((pcl2 / 13.6) + 760) - p_sat_pure_now)) * 18.015;
+    const v_h2 = (m_h2 / 2.016) * (p_v_h2_mmhg / (((ph2 / 13.6) + 760) - p_v_h2_mmhg)) * 18.015;
+
+    const water_leaving_in_product = m_naoh * ((1 - cout) / cout);
+    const q_brine_in = (m_salt - (gout * (m_na + m_cl2 + m_wtr_mem + v_cl2) / rho_out)) / (gin - (gout * rho_in / rho_out));
+    const r_anolyte_val = (q_brine_in * rho_in - m_wtr_mem - m_cl2 - v_cl2 - m_na) / rho_out;
+
+    // --- CDU Logic ---
+    const q_cdu_brine = parseFloat(document.getElementById('cdu_brine_q').value) || 0;
+    const clo3_in = parseFloat(document.getElementById('clo3_in').value) || 0;
+    const clo3_out = parseFloat(document.getElementById('clo3_out').value) || 0;
+    const hcl_pct = parseFloat(document.getElementById('hcl_strength').value) || 32;
+    const target_acid = parseFloat(document.getElementById('target_acidity').value) || 18;
+    const hcl_rho = 1.0001 + (0.0045 * hcl_pct) + (0.00002 * Math.pow(hcl_pct, 2)); 
+    const delta_clo3 = Math.max(0, clo3_in - clo3_out);
+    const kg_clo3_dest = q_cdu_brine * delta_clo3;
+    
+    const hcl_req_100 = (kg_clo3_dest * 2.05) + (q_cdu_brine * target_acid);
+    const hcl_kg_hr_actual = hcl_req_100 / (hcl_pct / 100);
+    const hcl_m3_hr = hcl_kg_hr_actual / (hcl_rho * 1000);
+
+    document.getElementById('r_clo3_dest').innerText = kg_clo3_dest.toFixed(0);
+    document.getElementById('r_hcl_kg_hr').innerText = Math.round(hcl_kg_hr_actual);
+    document.getElementById('r_hcl_flow_m3').innerText = hcl_m3_hr.toFixed(3);
+    document.getElementById('r_cdu_cl2_gen').innerText = (kg_clo3_dest * 2.0).toFixed(0);
+
+    // --- Dechlorination & Polishing Logic ---
+    const inlet_cl2_ppm = parseFloat(document.getElementById('inlet_cl2_ppm').value) || 0;
+    const cell_ph = parseFloat(document.getElementById('anolyte_ph').value) || 4.5;
+    const decl_vac_abs = parseFloat(document.getElementById('decl_vac').value) || 450;
+    const target_ppm = parseFloat(document.getElementById('target_ppm').value) || 20;
+
+    let hcl_input_box = document.getElementById('manual_hcl');
+    if (document.activeElement !== hcl_input_box || hcl_input_box.value == "") {
+        hcl_input_box.value = Math.round(hcl_kg_hr_actual);
+    }
+    let active_hcl = parseFloat(hcl_input_box.value);
+
+    const moles_h_inlet = Math.pow(10, -cell_ph) * (r_anolyte_val * 1000);
+    const moles_h_added = (active_hcl * (hcl_pct/100)) / 0.03646; 
+    const final_ph = -Math.log10(Math.max(1e-7, (moles_h_inlet + moles_h_added) / (r_anolyte_val * 1000)));
+
+    const t_water_bp = (1730.63 / (8.07131 - Math.log10(decl_vac_abs))) - 233.426;
+    const t_brine_bp = t_water_bp + (0.011 * gout);
+
+    const total_cl2_in_brine = (inlet_cl2_ppm * rho_out * r_anolyte_val) / 1000000; 
+    const alpha_cl2 = 1 / (1 + Math.pow(10, (final_ph - 3.3))); 
+    const solubility_at_88c = 0.45 * r_anolyte_val; 
+    
+    const bubble_cl2 = Math.max(0, (total_cl2_in_brine * alpha_cl2) - solubility_at_88c);
+    const stripped_cl2 = Math.max(0, (total_cl2_in_brine - bubble_cl2) - (target_ppm * rho_out * r_anolyte_val / 1000000));
+    const total_recovered = bubble_cl2 + stripped_cl2;
+
+    // Polishing Calculations
+    const sbs_excess_ppm = parseFloat(document.getElementById('sbs_excess').value) || 0;
+    const naoh_ex_mg_l = parseFloat(document.getElementById('naoh_excess_mg').value) || 0;
+    const pol_naoh_pct = (parseFloat(document.getElementById('pol_naoh_pct').value) || 33) / 100;
+    
+    const cl2_resid_kg = (target_ppm * rho_out * r_anolyte_val) / 1000000;
+    
+    // SBS 100% basis calculation
+    const sbs_pure_kg = (cl2_resid_kg * 1.468) + (sbs_excess_ppm * r_anolyte_val * rho_out / 1000000);
+    const sbs_flow_10 = sbs_pure_kg / 0.10;
+    const sbs_density_10 = 1048; 
+    const sbs_m3_hr = sbs_flow_10 / sbs_density_10;
+    
+    // NaOH 100% basis calculation (including mg/L conversion)
+    const naoh_pure_kg = (cl2_resid_kg * 1.693) + (moles_h_added * 0.040) + ((naoh_ex_mg_l * r_anolyte_val)/1000);
+    const naoh_pol_kg = naoh_pure_kg / pol_naoh_pct;
+    const naoh_pol_m3 = naoh_pol_kg / ((1 + (pol_naoh_pct * 0.8)) * 1000);
+
+    const prod_mt_hr = m_naoh / 1000;
+
+    document.getElementById('r_post_ph').innerText = final_ph.toFixed(2);
+    document.getElementById('r_brine_bp').innerText = t_brine_bp.toFixed(1);
+    document.getElementById('r_bubble_cl2').innerText = bubble_cl2.toFixed(2);
+    document.getElementById('r_stripped_cl2').innerText = stripped_cl2.toFixed(2);
+    document.getElementById('r_total_cl2_rec').innerText = total_recovered.toFixed(2);
+    document.getElementById('r_sbs_kg').innerText = sbs_flow_10.toFixed(2);
+    document.getElementById('r_sbs_m3').innerText = sbs_m3_hr.toFixed(3);
+    document.getElementById('r_sbs_mt').innerText = (sbs_pure_kg / prod_mt_hr).toFixed(2); 
+    document.getElementById('r_naoh_pol_kg').innerText = naoh_pol_kg.toFixed(2);
+    document.getElementById('r_naoh_pol_m3').innerText = naoh_pol_m3.toFixed(3);
+    document.getElementById('r_naoh_pol_mt').innerText = (naoh_pure_kg / prod_mt_hr).toFixed(2); 
+
+    // --- Steam Logic ---
+    const lp_p_gauge = parseFloat(document.getElementById('lp_p_set').value) || 2;
+    const p_abs_bar = (lp_p_gauge * 0.980665) + 1.01325; 
+    const tsat = (1730.63 / (8.07131 - Math.log10(p_abs_bar * 750.062))) - 233.426;
+    const hfg = 2257 - (2.41 * (tsat - 100)); 
+    const h_ds = (4.186 * tsat + hfg) + (parseFloat(document.getElementById('ds_t_set').value) > tsat ? 2.0 * (parseFloat(document.getElementById('ds_t_set').value) - tsat) : 0);
+    const heat_b = (q_brine_in * rho_in) * 3.3 * Math.max(0, (document.getElementById('b_tout').value - document.getElementById('b_tin').value));
+    const heat_c = (parseFloat(document.getElementById('c_flow_steam').value) * 1310) * 3.55 * Math.max(0, (document.getElementById('c_tout').value - document.getElementById('c_tin').value));
+    const heat_cdu = (parseFloat(document.getElementById('cdu_flow').value) * rho_out) * 3.3 * Math.max(0, (document.getElementById('cdu_tout').value - document.getElementById('cdu_tin').value));
+    const m_steam_hr = (heat_b + heat_c + heat_cdu) / (h_ds - (4.186 * tsat));
+    const m_dm_ds_hr = (parseFloat(document.getElementById('ds_t_set').value) > tsat) ? m_steam_hr * ((2943 - h_ds) / (2943 - (4.186 * 40))) : 0; 
+
+    // --- Output Assignments ---
+    document.getElementById('r_steam_brine').innerText = Math.round(heat_b / (h_ds - (4.186 * tsat))).toLocaleString();
+    document.getElementById('r_steam_caustic').innerText = Math.round(heat_c / (h_ds - (4.186 * tsat))).toLocaleString();
+    document.getElementById('r_steam_cdu').innerText = Math.round(heat_cdu / (h_ds - (4.186 * tsat))).toLocaleString();
+    document.getElementById('r_steam_kg').innerText = Math.round(m_steam_hr).toLocaleString();
+    document.getElementById('r_steam_day').innerText = ((m_steam_hr * 24) / 1000).toFixed(2);
+    document.getElementById('r_dm_ds_m3').innerText = (m_dm_ds_hr / 1000).toFixed(3);
+    document.getElementById('r_condensate_m3').innerText = ((m_steam_hr + m_dm_ds_hr) / 1000).toFixed(3);
+    document.getElementById('r_ratio').innerText = (m_steam_hr / m_naoh).toFixed(3);
+    document.getElementById('r_cost_ton').innerText = Math.round((m_steam_hr / m_naoh) * (parseFloat(document.getElementById('s_cost').value) || 0)).toLocaleString();
+    document.getElementById('r_tsat').innerText = tsat.toFixed(1);
+    document.getElementById('r_hfg').innerText = Math.round(hfg).toLocaleString();
+    document.getElementById('r_brineIn').innerText = q_brine_in.toFixed(2);
+    document.getElementById('r_anolyte').innerText = r_anolyte_val.toFixed(2);
+    document.getElementById('r_cl2_flow').innerText = Math.round(m_cl2).toLocaleString();
+    document.getElementById('r_h2_flow').innerText = Math.round(m_h2).toLocaleString();
+    document.getElementById('r_vapCl2').innerText = Math.round(v_cl2).toLocaleString();
+    document.getElementById('r_vapH2').innerText = Math.round(v_h2).toLocaleString();
+    document.getElementById('r_moist_cl2_pct').innerText = ((v_cl2 / (m_cl2 + v_cl2)) * 100).toFixed(2);
+    document.getElementById('r_moist_h2_pct').innerText = ((v_h2 / (m_h2 + v_h2)) * 100).toFixed(2);
+    document.getElementById('r_wtr').innerText = Math.round(m_wtr_mem).toLocaleString();
+    document.getElementById('r_wrx').innerText = Math.round(m_wrx).toLocaleString();
+    document.getElementById('r_salt').innerText = Math.round(m_salt).toLocaleString();
+    document.getElementById('r_dmCau').innerText = ((water_leaving_in_product + v_h2 + m_wrx - m_wtr_mem) / 1000).toFixed(2);
+    document.getElementById('r_dmBrine').innerText = ((m_na + m_cl2 + m_wtr_mem + v_cl2 - m_salt) / 1000).toFixed(2);
+    const evap_cond = Math.max(0, water_leaving_in_product - (m_naoh * ((1 - target) / target)));
+    document.getElementById('r_evap').innerText = (evap_cond/1000).toFixed(2);
+
+    // --- Acid Calc ---
+    const p_sat_acid = Math.pow(10, 8.07131 - (1730.63 / (parseFloat(document.getElementById('acid_t_cl2').value) + 233.426)));
+    const moisture_hr = (m_cl2 / 70.9) * (p_sat_acid / ((parseFloat(document.getElementById('acid_p_cl2').value) / 13.6) + 760 - p_sat_acid)) * 18.015;
+    const ac_in = (parseFloat(document.getElementById('acid_in_conc').value) || 98) / 100;
+    const ac_out = (parseFloat(document.getElementById('acid_out_conc').value) || 78) / 100;
+    const acid_cons_hr = (moisture_hr * ac_out) / (ac_in - ac_out);
+    document.getElementById('r_acid_moist').innerText = moisture_hr.toFixed(2);
+    document.getElementById('r_acid_cons').innerText = acid_cons_hr.toFixed(2);
+    document.getElementById('r_ratio_cl2').innerText = (acid_cons_hr / (m_cl2/1000)).toFixed(2);
+    document.getElementById('r_ratio_naoh').innerText = (acid_cons_hr / (m_naoh/1000)).toFixed(2);
+    document.getElementById('r_acid_cost_ton').innerText = Math.round((acid_cons_hr / (m_naoh/1000)) * parseFloat(document.getElementById('acid_cost_kg').value)).toLocaleString();
+
+// --- Sodium Hypochlorite Production Logic (Batch MT Basis) ---
+    const h_batch = parseFloat(document.getElementById('hypo_batch_size').value) || 0;
+    const h_av_cl2 = parseFloat(document.getElementById('hypo_av_cl2').value) || 0;
+    const h_ex_naoh = parseFloat(document.getElementById('hypo_ex_naoh').value) || 0;
+    const h_feed_pct = (parseFloat(document.getElementById('hypo_feed_naoh_pct').value) || 18) / 100;
+
+    // 1. Density Calculation
+    const h_rho = 1000 + (0.82 * h_av_cl2) + (1.0 * h_ex_naoh);
+    
+    // 2. Weight Percentage Calculation (% NaOCl)
+    const h_wt_pct = (h_av_cl2 * 1.05 / h_rho) * 100;
+
+    // 3. Specific Consumption Ratios (per 1 MT of Hypo)
+    const h_cl2_cons_ratio = (h_av_cl2 / h_rho); // MT Cl2 / MT Hypo
+    const h_naoh_ex_ratio = (h_ex_naoh / h_rho); // MT NaOH / MT Hypo
+    const h_naoh100_ratio = (h_cl2_cons_ratio * 1.128) + h_naoh_ex_ratio;
+
+    // 4. Total Batch Consumption based on User Specified MT
+    const h_cl2_total = h_cl2_cons_ratio * h_batch * 1000; // Total kg
+    const h_naoh100_total = h_naoh100_ratio * h_batch * 1000; // Total kg
+    const h_feed_mass_total = h_naoh100_total / h_feed_pct; // Total kg of dilute caustic
+
+    // Update Hypo UI
+    document.getElementById('r_batch_disp').innerText = h_batch;
+    document.getElementById('r_hypo_rho').innerText = h_rho.toFixed(1);
+    document.getElementById('r_hypo_wt_pct').innerText = h_wt_pct.toFixed(2);
+    
+    document.getElementById('r_hypo_cl2_total').innerText = Math.round(h_cl2_total).toLocaleString();
+    document.getElementById('r_hypo_naoh100_total').innerText = Math.round(h_naoh100_total).toLocaleString();
+    document.getElementById('r_hypo_feed_total').innerText = Math.round(h_feed_mass_total).toLocaleString();
+    
+    document.getElementById('r_hypo_cl2_ratio').innerText = h_cl2_cons_ratio.toFixed(3);
+    document.getElementById('r_hypo_naoh_ratio').innerText = h_naoh100_ratio.toFixed(3);
+
+// --- Primary Brine Treatment Calculation Block ---
+const c_moist = parseFloat(document.getElementById('c_moist').value) || 0;
+const c_ca = parseFloat(document.getElementById('c_ca').value) || 0;
+const c_mg = parseFloat(document.getElementById('c_mg').value) || 0;
+const c_other = parseFloat(document.getElementById('c_other').value) || 0;
+const ex_soda = parseFloat(document.getElementById('ex_soda').value) || 0;
+const ex_naoh = parseFloat(document.getElementById('ex_naoh').value) || 0;
+const c_naoh_pct = (parseFloat(document.getElementById('c_naoh_strength').value) || 32) / 100;
+
+// Fetch and Display Dry Salt (Matches your input id="f_salt_dry")
+document.getElementById('f_salt_dry').value = Math.round(m_salt);
+
+// 1. Calculate Wet Salt Flow (Compensates for Moisture + Impurities)
+const purity_factor = (1 - (c_ca + c_mg + c_other) / 100);
+const moisture_factor = (1 - (c_moist / 100));
+let salt_wet = (purity_factor > 0 && moisture_factor > 0) ? m_salt / (purity_factor * moisture_factor) : 0;
+
+// 2. Reagent Stoichiometry
+// Soda Ash (Na2CO3) for Calcium removal (Ratio 2.645)
+const soda_stoic_100 = (m_salt * (c_ca / 100)) * 2.645;
+const soda_excess_100 = q_brine_in * ex_soda;
+const soda_total_sol_10 = (soda_stoic_100 + soda_excess_100) / 0.10; // 10% Solution
+
+// Caustic (NaOH) for Magnesium removal (Ratio 3.292)
+const naoh_stoic_100 = (m_salt * (c_mg / 100)) * 3.292;
+const naoh_excess_100 = q_brine_in * ex_naoh;
+const naoh_purif_total_sol = (naoh_stoic_100 + naoh_excess_100) / c_naoh_pct; // 32% Solution (Typical)
+
+// 3. UI Updates (FIXED VARIABLE NAMES)
+document.getElementById('r_salt_wet').innerText = Math.round(salt_wet).toLocaleString();
+
+// Ensure the ID r_soda_flow uses soda_total_sol_10
+document.getElementById('r_soda_flow').innerText = Math.round(soda_total_sol_10).toLocaleString();
+document.getElementById('r_purif_naoh_flow').innerText = Math.round(naoh_purif_total_sol).toLocaleString();
+
+// 5. VOLUMETRIC FLOWS (m3/hr)
+    // Densities: 10% Soda Ash ≈ 1100 kg/m3, 32% NaOH ≈ 1350 kg/m3
+    const soda_m3_hr = soda_total_sol_10 / 1100;
+    const naoh_m3_hr = naoh_purif_total_sol / 1310;
+
+    document.getElementById('r_soda_vol').innerText = soda_m3_hr.toFixed(3);
+    document.getElementById('r_purif_naoh_vol').innerText = naoh_m3_hr.toFixed(3);
+
+// Specific Ratios (kg 100% reagent / MT 100% NaOH produced)
+const mt_naoh_hr = m_naoh / 1000;
+document.getElementById('r_soda_ratio').innerText = ((soda_stoic_100 + soda_excess_100) / mt_naoh_hr).toFixed(2);
+document.getElementById('r_naoh_pur_ratio').innerText = ((naoh_stoic_100 + naoh_excess_100) / mt_naoh_hr).toFixed(2);
+
+ // --- Brine Water Management Sync (Process Optimizer) ---
+
+// 1. Theoretical calculations based on Plant Load (kg/hr to m3/hr)
+const calc_vcl2 = (v_cl2 / 1000).toFixed(2);
+const calc_vh2 = (v_h2 / 1000).toFixed(2);
+const calc_evap = (evap_cond / 1000).toFixed(2);
+
+// 2. SMART REFRESH: Update boxes unless user is actively typing
+if (document.activeElement.id !== 's9') document.getElementById('s9').value = calc_vcl2;
+if (document.activeElement.id !== 's10') document.getElementById('s10').value = calc_vh2;
+if (document.activeElement.id !== 's16') document.getElementById('s16').value = calc_evap;
+
+// Steam Condensate (S11) is always locked to calculated value
+document.getElementById('s11').value = ((m_steam_hr + m_dm_ds_hr) / 1000).toFixed(2);
+
+// 3. Calculation A: Total Internal Recovery (Streams 1-15, EXCLUDING 16)
+let total_rec_15 = 0;
+[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].forEach(id => {
+    total_rec_15 += parseFloat(document.getElementById('s' + id).value) || 0;
+});
+
+// 4. Calculation B: Permanent Membrane Water Loss
+const mem_loss_m3 = m_wtr_mem / 1000;
+const salt_moist_m3 = (m_salt * (parseFloat(document.getElementById('c_moist').value)/100)) / 1000;
+
+// Update core UI displays
+if(document.getElementById('r_rec_total')) document.getElementById('r_rec_total').innerText = total_rec_15.toFixed(2);
+if(document.getElementById('r_mem_loss')) document.getElementById('r_mem_loss').innerText = mem_loss_m3.toFixed(2);
+
+// 5. NEW LOGIC: Calculate Capacity Gap and CEU Handling
+const capacity_gap = mem_loss_m3 - (total_rec_15);
+const s16_val = parseFloat(document.getElementById('s16').value) || 0;
+
+let accommodate_val = 0;
+let transfer_val = 0;
+
+if (capacity_gap > 0) {
+    // We have room in the brine circuit
+    accommodate_val = Math.min(capacity_gap, s16_val);
+    transfer_val = s16_val - accommodate_val;
+} else {
+    // We already have a surplus (net_balance was positive)
+    accommodate_val = 0;
+    transfer_val = Math.abs(capacity_gap) + s16_val;
+}
+
+// 6. Update Final Result Boxes
+const acc_el = document.getElementById('r_accommodate');
+const div_el = document.getElementById('r_divert');
+const div_box = document.getElementById('status_box');
+
+if(acc_el) acc_el.innerText = accommodate_val.toFixed(2);
+if(div_el) div_el.innerText = transfer_val.toFixed(2);
+
+// Visual Alerts for the Transfer box
+if (transfer_val > 0) {
+    div_box.style.backgroundColor = "#fff5f5"; // Red Alert (Surplus)
+    div_box.style.borderColor = "#e74c3c";
+    div_el.style.color = "#e74c3c";
+} else {
+    div_box.style.backgroundColor = "#f2fdf6"; // Green Stable (Balanced)
+    div_box.style.borderColor = "#2ecc71";
+    div_el.style.color = "#2ecc71";
+}
+}
+</script>
+</body>
+</html>
+

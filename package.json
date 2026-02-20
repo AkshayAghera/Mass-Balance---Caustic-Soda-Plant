@@ -1,0 +1,54 @@
+{
+  "name": "mass-balance-csp",
+  "version": "1.0.9",
+  "description": "Mass Balance – Caustic Soda Plant",
+  "author": "Akshay Aghera",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AkshayAghera/Mass-Balance---Caustic-Soda-Plant.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64 --publish=never",
+    "deploy": "electron-builder --win --x64 --publish always"
+  },
+  "devDependencies": {
+    "electron": "^29.4.6",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-log": "^5.4.3",
+    "electron-updater": "^6.7.3"
+  },
+  "build": {
+    "appId": "com.csp.massbalance",
+    "productName": "Mass Balance CSP 2026",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "AkshayAghera",
+        "repo": "Mass-Balance---Caustic-Soda-Plant"
+      }
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "**/*",
+      "logo.png",
+      "icon.ico"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "shortcutName": "Mass Balance CSP 2026",
+      "oneClick": true
+    }
+  }
+}
