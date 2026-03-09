@@ -5,14 +5,9 @@
             <solid android:color="#ffffff" />
         </shape>
     </item>
-    
-    <item
-        android:top="100dp"
-        android:bottom="100dp"
-        android:left="100dp"
-        android:right="100dp">
+    <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/splash" />
+            android:src="@drawable/brand_launch" />
     </item>
 </layer-list>
