@@ -22,7 +22,6 @@ jobs:
         run: npm install
 
       - name: Build Web Assets
-        # We install shx here to ensure the "mkdir" and "cp" commands work
         run: |
           npm install shx
           npm run build 
@@ -33,10 +32,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Generate App Icons and Splash
-        run: |
-          npm install @capacitor/assets
-          npx capacitor-assets generate --android
+      # STEP REMOVED: "Generate App Icons and Splash" 
+      # We removed this to prevent the robot from overwriting your custom XML and padded logo.
 
       - name: Sync Capacitor
         run: npx cap sync android
