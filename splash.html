@@ -25,9 +25,6 @@
     }
 
     img {
-      width: auto;
-      height: auto;
-      /* INCREASED SIZE HERE: 85% width and 70% height */
       width: 750px; 
       max-height: 70vh;
       object-fit: contain;
@@ -42,7 +39,6 @@
       animation: blink 1.4s infinite both;
     }
 
-    /* Progress Bar Styles */
     .progress-container {
       width: 400px;
       height: 12px;
@@ -50,7 +46,7 @@
       border-radius: 10px;
       margin-top: 30px;
       overflow: hidden;
-      display: none; /* Hidden until update starts */
+      display: none; 
       border: 1px solid #334155;
     }
 
@@ -92,22 +88,42 @@
   </div>
 
   <script>
-    const { ipcRenderer } = require('electron');
+    // 1. Safety Check: Determine if we are in Electron or Android/Web
+    const isElectron = navigator.userAgent.toLowerCase().includes(' electron/');
 
-    // Listen for update detection
-    ipcRenderer.on('update_available', () => {
-      document.getElementById('loading-dots').style.display = 'none';
-      document.getElementById('update-box').style.display = 'block';
-      document.getElementById('status-text').innerText = "New update found! Preparing download...";
-    });
+    if (isElectron) {
+      // ELECTRON LOGIC (Windows)
+      try {
+        const { ipcRenderer } = require('electron');
 
-    // Listen for progress percentage
-    ipcRenderer.on('download-percentage', (event, percent) => {
-      document.getElementById('loading-dots').style.display = 'none';
-      document.getElementById('update-box').style.display = 'block';
-      document.getElementById('bar').style.width = percent + '%';
-      document.getElementById('status-text').innerText = `Downloading Update: ${percent}%`;
-    });
+        ipcRenderer.on('update_available', () => {
+          document.getElementById('loading-dots').style.display = 'none';
+          document.getElementById('update-box').style.display = 'block';
+          document.getElementById('status-text').innerText = "New update found! Preparing download...";
+        });
+
+        ipcRenderer.on('download-percentage', (event, percent) => {
+          document.getElementById('loading-dots').style.display = 'none';
+          document.getElementById('update-box').style.display = 'block';
+          document.getElementById('bar').style.width = percent + '%';
+          document.getElementById('status-text').innerText = `Downloading Update: ${percent}%`;
+        });
+      } catch (e) {
+        console.error("Electron IPC failed:", e);
+      }
+    } else {
+      // ANDROID/MOBILE LOGIC
+      // On mobile, we don't use ipcRenderer. 
+      // We just show the splash for 3 seconds then the system will load index.html.
+      document.getElementById('status-text').innerText = "Initializing Plant Data...";
+      
+      // Optional: Auto-redirect if testing in a browser
+      setTimeout(() => {
+        if(window.location.pathname.includes('splash.html')) {
+           window.location.href = 'index.html';
+        }
+      }, 3000);
+    }
   </script>
 </body>
 </html>

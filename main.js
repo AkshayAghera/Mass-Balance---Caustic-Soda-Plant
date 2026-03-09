@@ -3,7 +3,8 @@ const path = require("path");
 const { autoUpdater } = require("electron-updater");
 const log = require("electron-log");
 
-// 1. Configure Logging FIRST (Must be after app is defined)
+// 1. Configure Logging
+// Logs are stored in: %AppData%/mass-balance-csp/logs/main.log
 log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs/main.log');
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = "info";
@@ -39,7 +40,7 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
-    show: false,
+    show: false, // Hidden until update check is done
     icon: path.join(__dirname, "icon.ico"),
     webPreferences: {
       contextIsolation: true,
@@ -56,56 +57,83 @@ app.whenReady().then(() => {
   createSplash();
   createMainWindow();
 
-  // Trigger GitHub Update check
-  autoUpdater.checkForUpdatesAndNotify();
+  // Trigger GitHub Update check only if app is packed
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify();
+  } else {
+    // In Dev Mode, skip update and show main window after 3 seconds
+    setTimeout(() => {
+      if (splash && !splash.isDestroyed()) splash.close();
+      if (mainWindow) {
+        mainWindow.maximize();
+        mainWindow.show();
+      }
+    }, 3000);
+  }
 });
 
 // --- Auto-Updater Events ---
+
 autoUpdater.on('update-available', () => {
+  log.info("Update available found on GitHub.");
   if (splash && !splash.isDestroyed()) {
     splash.webContents.send('update_available');
   }
 });
 
 autoUpdater.on('download-progress', (progressObj) => {
+  let log_message = "Download speed: " + progressObj.bytesPerSecond;
+  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+  log.info(log_message);
+
   if (splash && !splash.isDestroyed()) {
     splash.webContents.send('download-percentage', Math.floor(progressObj.percent));
   }
 });
 
 autoUpdater.on('update-downloaded', (info) => {
-  // Logic to handle completed download
+  log.info("Update downloaded. Version: " + info.version);
+  
+  // Close splash and show main window before the dialog
   if (splash && !splash.isDestroyed()) splash.close();
-  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.maximize();
+    mainWindow.show();
+  }
 
-  dialog.showMessageBox({
+  // Final confirmation to user
+  dialog.showMessageBox(mainWindow, {
     type: 'info',
     title: 'Update Ready',
-    message: `Version ${info.version} has been downloaded. Restart to install?`,
-    buttons: ['Restart Now', 'Later'],
+    message: `A new version (${info.version}) has been downloaded.`,
+    detail: 'The application will restart to apply the update.',
+    buttons: ['Restart and Install Now', 'Later'],
     defaultId: 0
   }).then((result) => {
-    if (result.response === 0) autoUpdater.quitAndInstall();
+    if (result.response === 0) {
+      setImmediate(() => autoUpdater.quitAndInstall());
+    }
   });
 });
 
-autoUpdater.on('error', (err) => {
-  console.error("Update Error: ", err);
+autoUpdater.on('update-not-available', () => {
+  log.info("No updates available.");
   setTimeout(() => {
     if (splash && !splash.isDestroyed()) splash.close();
     if (mainWindow && !mainWindow.isDestroyed()) {
-       mainWindow.maximize();
-       mainWindow.show();
+      mainWindow.maximize();
+      mainWindow.show();
     }
   }, 3000);
 });
 
-autoUpdater.on('update-not-available', () => {
+autoUpdater.on('error', (err) => {
+  log.error("Update Error: " + err);
   setTimeout(() => {
     if (splash && !splash.isDestroyed()) splash.close();
     if (mainWindow && !mainWindow.isDestroyed()) {
-       mainWindow.maximize();
-       mainWindow.show();
+      mainWindow.maximize();
+      mainWindow.show();
     }
   }, 3000);
 });

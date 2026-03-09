@@ -11,15 +11,25 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder --win --x64 --publish=never",
-    "deploy": "electron-builder --win --x64 --publish always"
+    "deploy": "electron-builder --win --x64 --publish always",
+    "mobile:sync": "npx cap sync android",
+    "mobile:build": "npm run build && npx cap copy android"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
     "electron": "^29.4.6",
     "electron-builder": "^24.13.3"
   },
   "dependencies": {
     "electron-log": "^5.4.3",
     "electron-updater": "^6.7.3"
+  },
+  "capacitor": {
+    "appId": "com.akshayaghera.massbalance",
+    "appName": "Mass Balance CSP",
+    "webDir": "dist"
   },
   "build": {
     "appId": "com.csp.massbalance",

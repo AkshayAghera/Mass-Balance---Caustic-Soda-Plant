@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mass Balance CSP</string>
+    <string name="title_activity_main">Mass Balance CSP</string>
+    <string name="package_name">com.akshayaghera.massbalance</string>
+    <string name="custom_url_scheme">com.akshayaghera.massbalance</string>
+</resources>

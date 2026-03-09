@@ -1,0 +1,6 @@
+{
+  "appId": "com.akshayaghera.massbalance",
+  "appName": "Mass Balance CSP",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
