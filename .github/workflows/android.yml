@@ -16,12 +16,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm install
 
       - name: Build Web Assets
-        run: npm run build 
+        # We install shx here to ensure the "mkdir" and "cp" commands work
+        run: |
+          npm install shx
+          npm run build 
 
       - name: Set up Java
         uses: actions/setup-java@v4
