@@ -2,5 +2,15 @@
   "appId": "com.akshayaghera.massbalance",
   "appName": "Mass Balance CSP",
   "webDir": "dist",
-  "bundledWebRuntime": false
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffff",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": true,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
+  }
 }
