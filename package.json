@@ -9,20 +9,21 @@
     "url": "https://github.com/AkshayAghera/Mass-Balance---Caustic-Soda-Plant.git"
   },
   "scripts": {
-  "start": "electron .",
-  "build": "mkdir -p dist && cp index.html splash.html logo.png manifest.json service-worker.js dist/",
-  "mobile:sync": "npx cap sync android"
-}
+    "start": "electron .",
+    "build": "mkdir -p dist && cp index.html splash.html logo.png manifest.json service-worker.js dist/",
+    "deploy": "electron-builder --win --x64 --publish always",
+    "mobile:sync": "npx cap sync android"
+  },
   "devDependencies": {
-    "@capacitor/android": "^8.2.0",
-    "@capacitor/cli": "^8.2.0",
-    "@capacitor/core": "^8.2.0",
     "electron": "^29.4.6",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "@capacitor/cli": "^6.0.0"
   },
   "dependencies": {
     "electron-log": "^5.4.3",
-    "electron-updater": "^6.7.3"
+    "electron-updater": "^6.7.3",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.0.0"
   },
   "capacitor": {
     "appId": "com.akshayaghera.massbalance",
