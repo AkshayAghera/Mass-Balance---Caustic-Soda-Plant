@@ -5,7 +5,11 @@
             <solid android:color="#ffffff" />
         </shape>
     </item>
-    <item>
+
+    <item
+        android:left="50dp"
+        android:right="50dp"
+        android:gravity="center">
         <bitmap
             android:src="@drawable/plant_logo"
             android:gravity="center"
