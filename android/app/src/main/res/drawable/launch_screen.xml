@@ -5,10 +5,9 @@
             <solid android:color="#ffffff" />
         </shape>
     </item>
-
     <item
-        android:width="280dp"
-        android:height="280dp"
+        android:width="250dp" 
+        android:height="250dp"
         android:gravity="center">
         <bitmap
             android:src="@drawable/splash"
