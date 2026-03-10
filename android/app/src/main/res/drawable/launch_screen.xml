@@ -5,13 +5,12 @@
             <solid android:color="#ffffff" />
         </shape>
     </item>
-    <item
-        android:width="250dp" 
-        android:height="250dp"
-        android:gravity="center">
+
+    <item>
         <bitmap
             android:src="@drawable/splash"
-            android:filter="true"
-            android:gravity="center" />
+            android:gravity="center"
+            android:scaleType="fitCenter"
+            android:filter="true" />
     </item>
 </layer-list>
