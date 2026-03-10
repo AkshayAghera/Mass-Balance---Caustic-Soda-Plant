@@ -14,8 +14,8 @@
     </style>
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-    <item name="windowSplashScreenAnimatedIcon">@drawable/launch_screen</item>
+    <item name="windowSplashScreenAnimatedIcon">@drawable/plant_logo</item>
     <item name="windowSplashScreenBackground">#ffffff</item>
-    </style>
+</style>
 
 </resources>
