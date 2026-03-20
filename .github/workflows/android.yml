@@ -16,6 +16,14 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      # 1. Install Node dependencies (Capacitor/Cordova)
+      - name: Install Dependencies
+        run: npm install
+
+      # 2. Sync Capacitor (This creates the missing gradle files)
+      - name: Capacitor Sync
+        run: npx cap sync android
+
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
