@@ -1,53 +1,29 @@
-name: Build Android APK
+name: Android Build
 on:
   push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build Web Assets
-        run: |
-          npm install shx
-          npm run build 
-
-      - name: Set up Java
+      - name: set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
 
-      # STEP REMOVED: "Generate App Icons and Splash" 
-      # We removed this to prevent the robot from overwriting your custom XML and padded logo.
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
 
-      - name: Sync Capacitor
-        run: npx cap sync android
+      - name: Build with Gradle
+        run: cd android && ./gradlew assembleDebug
 
-      - name: Build APK (Gradle)
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Upload APK to GitHub Releases
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          files: android/app/build/outputs/apk/debug/app-debug.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
